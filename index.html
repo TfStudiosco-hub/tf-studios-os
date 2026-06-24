@@ -188,10 +188,83 @@ input[type=number]{-moz-appearance:textfield}
 .status-select option{padding:4px 8px}
 
 .status-badge{display:inline-block;padding:3px 10px;border-radius:2px;font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.1em;text-transform:uppercase}
+
+/* Login Screen */
+#login-screen {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+#login-screen.hidden {
+  display: none;
+}
+.login-box {
+  background: var(--s1);
+  border: 1px solid var(--b1);
+  border-radius: 4px;
+  padding: 40px;
+  width: 380px;
+  max-width: 90vw;
+}
+.login-box h2 {
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 400;
+  margin-bottom: 6px;
+}
+.login-box .sub {
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 24px;
+  font-family: var(--mono);
+}
+.login-box .field {
+  margin-bottom: 16px;
+}
+.login-box .btn {
+  width: 100%;
+  margin-top: 8px;
+}
+.login-box .error {
+  color: var(--danger);
+  font-family: var(--mono);
+  font-size: 11px;
+  margin-top: 12px;
+  display: none;
+}
+.login-box .error.show {
+  display: block;
+}
 </style>
 </head>
 <body>
-<div class="shell">
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-box">
+    <h2>TF<span style="color:var(--ads)">.</span>Studios</h2>
+    <div class="sub">brand os · sign in</div>
+    <div class="field">
+      <label>email</label>
+      <input type="email" id="login-email" placeholder="admin@tfstudio.com" value="admin@tfstudio.com">
+    </div>
+    <div class="field">
+      <label>password</label>
+      <input type="password" id="login-password" placeholder="••••••••" value="TFStudio2026!">
+    </div>
+    <button class="btn btn-primary" id="login-btn">sign in</button>
+    <div class="error" id="login-error">Invalid email or password</div>
+    <div style="margin-top:16px;text-align:center;font-family:var(--mono);font-size:10px;color:var(--muted)">
+      Default: admin@tfstudio.com / TFStudio2026!
+    </div>
+  </div>
+</div>
+
+<div class="shell" id="app-shell" style="display:none">
 
 <!-- SIDEBAR -->
 <nav class="sidebar">
@@ -215,6 +288,10 @@ input[type=number]{-moz-appearance:textfield}
   </div>
   <div class="sb-bottom">
     <div class="sb-date" id="sb-date"></div>
+    <div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center">
+      <span id="user-email" style="font-family:var(--mono);font-size:9px;color:var(--muted)"></span>
+      <button class="btn btn-ghost btn-sm" id="logout-btn" style="font-size:8px;padding:3px 8px">sign out</button>
+    </div>
   </div>
 </nav>
 
@@ -454,7 +531,6 @@ input[type=number]{-moz-appearance:textfield}
     <button class="btn btn-primary" onclick="openModal('modal-order')">+ add order</button>
   </div>
   <div class="pg-body">
-    <!-- Stats with percentages -->
     <div class="grid6 gap">
       <div class="card card-sm"><h3>total orders</h3><div class="kpi-val" id="ord-total">0</div></div>
       <div class="card card-sm"><h3>confirmed</h3><div class="kpi-val" style="color:var(--restock)" id="ord-confirmed">0</div><div class="kpi-sub" id="ord-confirmed-pct">0%</div></div>
@@ -733,13 +809,12 @@ const firebaseConfig = {
 
 // Import Firebase modules
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import { getFirestore, doc, setDoc, getDoc, onSnapshot, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { getFirestore, doc, setDoc, getDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
 
 // ════════════════════════════════════ STATE ════
 const DB = {
@@ -754,52 +829,59 @@ const DB = {
 let currentUser = null;
 let unsubscribe = null;
 
-// ════════════════════════════════════ AUTH UI ════
-function setupAuth() {
-  const authDiv = document.createElement('div');
-  authDiv.style.cssText = `
-    position: fixed;
-    top: 0;
-    right: 0;
-    padding: 10px 20px;
-    background: var(--s1);
-    border-bottom: 1px solid var(--b1);
-    border-left: 1px solid var(--b1);
-    border-radius: 0 0 0 4px;
-    z-index: 1000;
-    font-family: var(--mono);
-    font-size: 11px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  `;
-  authDiv.innerHTML = `
-    <span id="auth-status" style="color:var(--muted)">Connecting...</span>
-    <button id="auth-btn" class="btn btn-ghost btn-sm">Sign In</button>
-  `;
-  document.body.prepend(authDiv);
+// ════════════════════════════════════ DOM REFS ════
+const loginScreen = document.getElementById('login-screen');
+const appShell = document.getElementById('app-shell');
+const loginEmail = document.getElementById('login-email');
+const loginPassword = document.getElementById('login-password');
+const loginBtn = document.getElementById('login-btn');
+const loginError = document.getElementById('login-error');
+const userEmailEl = document.getElementById('user-email');
+const logoutBtn = document.getElementById('logout-btn');
 
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      currentUser = user;
-      document.getElementById('auth-status').textContent = `👤 ${user.displayName || user.email}`;
-      document.getElementById('auth-btn').textContent = 'Sign Out';
-      loadData();
-    } else {
-      currentUser = null;
-      document.getElementById('auth-status').textContent = '🔒 Not signed in (read-only)';
-      document.getElementById('auth-btn').textContent = 'Sign In with Google';
-      loadFromLocalStorage();
-    }
-  });
+// ════════════════════════════════════ AUTH ════
+async function handleLogin() {
+  const email = loginEmail.value.trim();
+  const password = loginPassword.value.trim();
+  if (!email || !password) {
+    loginError.textContent = 'Please enter email and password';
+    loginError.classList.add('show');
+    return;
+  }
+  try {
+    loginBtn.textContent = 'Signing in...';
+    loginBtn.disabled = true;
+    loginError.classList.remove('show');
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    currentUser = userCredential.user;
+    loginScreen.classList.add('hidden');
+    appShell.style.display = 'flex';
+    userEmailEl.textContent = currentUser.email;
+    loadData();
+    toast('✅ Signed in as ' + currentUser.email);
+  } catch (error) {
+    console.error('Login error:', error);
+    loginError.textContent = error.message || 'Invalid email or password';
+    loginError.classList.add('show');
+  } finally {
+    loginBtn.textContent = 'sign in';
+    loginBtn.disabled = false;
+  }
+}
 
-  document.getElementById('auth-btn').addEventListener('click', () => {
-    if (currentUser) {
-      auth.signOut();
-    } else {
-      signInWithPopup(auth, provider).catch(console.error);
-    }
-  });
+async function handleLogout() {
+  try {
+    await signOut(auth);
+    currentUser = null;
+    if (unsubscribe) unsubscribe();
+    appShell.style.display = 'none';
+    loginScreen.classList.remove('hidden');
+    localStorage.removeItem('tf_os_v2');
+    toast('Signed out');
+  } catch (error) {
+    console.error('Logout error:', error);
+    toast('Error signing out');
+  }
 }
 
 // ════════════════════════════════════ FIRESTORE ════
@@ -839,7 +921,7 @@ async function uploadToFirestore() {
 
 async function syncToCloud() {
   if (!currentUser) {
-    toast('🔒 Sign in to sync');
+    toast('🔒 Not signed in');
     return;
   }
   try {
@@ -918,7 +1000,7 @@ function toast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2000);
+  setTimeout(() => t.classList.remove('show'), 3000);
 }
 
 // ════════════════════════════════════ NAVIGATION ════
@@ -1617,20 +1699,38 @@ function renderDashboard() {
   }
 }
 
+// ════════════════════════════════════ EVENT LISTENERS ════
+loginBtn.addEventListener('click', handleLogin);
+loginEmail.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleLogin(); });
+loginPassword.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleLogin(); });
+logoutBtn.addEventListener('click', handleLogout);
+
 // ════════════════════════════════════ INIT ════
 const STATUS_COLORS = { pending:'chip-amber', confirmed:'chip-green', shipped:'chip-blue', delivered:'chip-green', cancelled:'chip-red', returned:'chip-pink', upcoming:'chip-blue', live:'chip-green', 'sold out':'chip-red', archived:'chip-purple' };
 
 function init() {
-  loadFromLocalStorage();
-  setupAuth();
-  
+  // Check if user is already logged in
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      currentUser = user;
+      loginScreen.classList.add('hidden');
+      appShell.style.display = 'flex';
+      userEmailEl.textContent = currentUser.email;
+      loadFromLocalStorage();
+      loadData();
+      toast('✅ Welcome back, ' + currentUser.email);
+    } else {
+      loginScreen.classList.remove('hidden');
+      appShell.style.display = 'none';
+    }
+  });
+
   const now = new Date();
   const sbDate = document.getElementById('sb-date');
   if(sbDate) sbDate.innerHTML = now.toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short',year:'numeric'}).toUpperCase()+'<br>'+now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
   setTimeout(() => {
     addOrderItemRow();
   }, 100);
-  renderDashboard();
 }
 
 init();
