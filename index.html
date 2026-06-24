@@ -1,0 +1,1639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TF.Studios — OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#08080a;--s1:#0f0f13;--s2:#15151a;--s3:#1c1c23;
+  --b1:#1e1e26;--b2:#2a2a36;--b3:#38384a;
+  --text:#eaeaf4;--muted:#5c5c78;--subtle:#3a3a50;
+  --ads:#00d4ff;--rev:#7c6af7;--restock:#22c55e;--warn:#f59e0b;--danger:#ef4444;--pink:#f472b6;
+  --mono:'IBM Plex Mono',monospace;--sans:'Inter',sans-serif;
+}
+html{font-size:15px}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;display:flex;flex-direction:column}
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+
+.shell{display:flex;height:100vh;overflow:hidden}
+
+.sidebar{width:200px;flex-shrink:0;background:var(--s1);border-right:1px solid var(--b1);display:flex;flex-direction:column;overflow:hidden}
+.sb-logo{padding:24px 20px 20px;border-bottom:1px solid var(--b1)}
+.sb-logo .brand{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.1em;color:var(--text)}
+.sb-logo .brand span{color:var(--ads)}
+.sb-logo .sub{font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+.sb-nav{flex:1;padding:12px 0;overflow-y:auto}
+.sb-section{font-family:var(--mono);font-size:8px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);padding:16px 20px 6px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;transition:all .15s;border-left:2px solid transparent;font-size:12px;font-weight:500;color:var(--muted)}
+.nav-item:hover{color:var(--text);background:var(--s2)}
+.nav-item.active{color:var(--text);border-left-color:var(--ads);background:rgba(0,212,255,.05)}
+.nav-item .icon{font-size:14px;flex-shrink:0}
+.sb-bottom{padding:16px 20px;border-top:1px solid var(--b1)}
+.sb-date{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--muted);line-height:1.6}
+
+.content{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.page{display:none;flex:1;flex-direction:column;animation:fadeIn .2s ease}
+.page.active{display:flex}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+.pg-header{padding:28px 36px 24px;border-bottom:1px solid var(--b1);display:flex;align-items:flex-end;justify-content:space-between;flex-shrink:0}
+.pg-header h1{font-family:var(--mono);font-size:18px;font-weight:400;letter-spacing:-.01em}
+.pg-header p{font-size:11px;color:var(--muted);margin-top:4px;font-family:var(--mono);letter-spacing:.06em}
+.pg-body{padding:28px 36px;flex:1}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.grid6{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+.gcol2{grid-column:span 2}
+
+.card{background:var(--s1);border:1px solid var(--b1);border-radius:3px;padding:20px}
+.card-sm{padding:16px}
+.card h3{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.kpi-val{font-family:var(--mono);font-size:28px;font-weight:300;color:var(--text);letter-spacing:-.02em}
+.kpi-sub{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:5px}
+.kpi-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:6px;vertical-align:middle}
+
+.chip{display:inline-block;font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;padding:3px 8px;border-radius:2px}
+.chip-blue{color:var(--ads);background:rgba(0,212,255,.08)}
+.chip-purple{color:var(--rev);background:rgba(124,106,247,.08)}
+.chip-green{color:var(--restock);background:rgba(34,197,94,.08)}
+.chip-amber{color:var(--warn);background:rgba(245,158,11,.08)}
+.chip-red{color:var(--danger);background:rgba(239,68,68,.08)}
+.chip-pink{color:var(--pink);background:rgba(244,114,182,.08)}
+
+.status-pending{color:var(--warn);background:rgba(245,158,11,.12)}
+.status-confirmed{color:var(--restock);background:rgba(34,197,94,.12)}
+.status-processing{color:var(--ads);background:rgba(0,212,255,.12)}
+.status-shipped{color:var(--rev);background:rgba(124,106,247,.12)}
+.status-delivered{color:var(--restock);background:rgba(34,197,94,.12)}
+.status-cancelled{color:var(--danger);background:rgba(239,68,68,.12)}
+.status-returned{color:var(--pink);background:rgba(244,114,182,.12)}
+.status-rejected{color:var(--danger);background:rgba(239,68,68,.12)}
+
+.divider{border:none;border-top:1px solid var(--b1);margin:20px 0}
+
+.field{margin-bottom:14px}
+.field label{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.field input,.field select,.field textarea{width:100%;background:var(--s2);border:1px solid var(--b1);color:var(--text);font-family:var(--mono);font-size:13px;padding:10px 12px;border-radius:2px;outline:none;transition:border-color .15s;appearance:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--ads)}
+.field input::placeholder{color:var(--subtle)}
+.field select option{background:var(--s2)}
+.field textarea{resize:vertical;min-height:64px;font-size:12px}
+.field-row{display:grid;gap:12px}
+.field-row.c2{grid-template-columns:1fr 1fr}
+.field-row.c3{grid-template-columns:1fr 1fr 1fr}
+.prefix-wrap{position:relative}
+.prefix-wrap .pfx{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:12px;color:var(--muted);pointer-events:none}
+.prefix-wrap input{padding-left:28px}
+
+.btn{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;padding:10px 18px;border-radius:2px;cursor:pointer;border:none;transition:all .15s;white-space:nowrap}
+.btn-primary{background:var(--ads);color:#000}
+.btn-primary:hover{background:#33deff}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--b1)}
+.btn-ghost:hover{border-color:var(--b2);color:var(--text)}
+.btn-danger{background:transparent;color:var(--danger);border:1px solid rgba(239,68,68,.25)}
+.btn-danger:hover{background:rgba(239,68,68,.08);border-color:var(--danger)}
+.btn-sm{padding:6px 12px;font-size:10px}
+.btn-row{display:flex;gap:8px;margin-top:6px}
+.btn-edit{background:transparent;color:var(--ads);border:1px solid rgba(0,212,255,.2);padding:4px 10px;font-size:10px;cursor:pointer;border-radius:2px;font-family:var(--mono)}
+.btn-edit:hover{background:rgba(0,212,255,.08);border-color:var(--ads)}
+.btn-remove-item{background:transparent;color:var(--danger);border:none;cursor:pointer;font-family:var(--mono);font-size:11px;padding:4px 8px}
+.btn-remove-item:hover{color:#ff6b6b}
+
+.tbl-wrap{background:var(--s1);border:1px solid var(--b1);border-radius:3px;overflow:hidden}
+.tbl-head{padding:14px 20px;border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between}
+.tbl-head h3{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+table{width:100%;border-collapse:collapse}
+th{font-family:var(--mono);font-size:8px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);text-align:left;padding:10px 16px;border-bottom:1px solid var(--b1)}
+td{padding:12px 16px;font-family:var(--mono);font-size:12px;color:var(--text);border-bottom:1px solid var(--b1)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--s2)}
+.td-muted{color:var(--muted)}
+.td-del{cursor:pointer;color:var(--muted);transition:color .15s;text-align:right}
+.td-del:hover{color:var(--danger)}
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.08em}
+
+.prog-bar{height:3px;background:var(--b1);border-radius:2px;overflow:hidden;margin-top:10px}
+.prog-fill{height:100%;border-radius:2px;transition:width .8s cubic-bezier(.16,1,.3,1)}
+
+.alloc-strip{display:flex;height:6px;border-radius:3px;overflow:hidden;margin-top:8px;gap:2px}
+.alloc-seg{height:100%;border-radius:1px;transition:flex .6s ease}
+
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--s1);border:1px solid var(--b2);border-radius:4px;width:640px;max-width:95vw;max-height:90vh;overflow-y:auto}
+.modal-header{padding:20px 24px 16px;border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between}
+.modal-header h2{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.12em;text-transform:uppercase}
+.modal-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:0 4px}
+.modal-close:hover{color:var(--text)}
+.modal-body{padding:20px 24px 24px}
+
+.cal-wrap{background:var(--s1);border:1px solid var(--b1);border-radius:3px;overflow:hidden}
+.cal-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--b1)}
+.cal-title{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase}
+.cal-nav-btn{background:none;border:1px solid var(--b1);color:var(--muted);cursor:pointer;padding:4px 9px;font-size:12px;border-radius:2px;transition:all .15s}
+.cal-nav-btn:hover{color:var(--text);border-color:var(--b2)}
+.cal-day-row,.cal-cells{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;padding:10px 12px}
+.cal-day-row{padding-bottom:4px}
+.cal-dl{font-family:var(--mono);font-size:8px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);text-align:center}
+.cal-cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:2px;cursor:pointer;position:relative;transition:background .15s;font-family:var(--mono);font-size:11px;color:var(--muted);border:1px solid transparent}
+.cal-cell:hover:not(.cal-empty){background:var(--s2);color:var(--text)}
+.cal-cell.cal-today{border-color:var(--ads);color:var(--ads)}
+.cal-cell.cal-has{color:var(--text)}
+.cal-cell.cal-has::after{content:'';position:absolute;bottom:3px;width:3px;height:3px;border-radius:50%;background:var(--restock)}
+.cal-cell.cal-sel{background:var(--s2);border-color:var(--b2);color:var(--text)}
+.cal-cell.cal-empty{cursor:default}
+
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--s2);border:1px solid var(--b2);color:var(--text);font-family:var(--mono);font-size:11px;letter-spacing:.08em;padding:10px 22px;border-radius:2px;opacity:0;transition:all .22s;z-index:999;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.size-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.size-cell{background:var(--s2);border:1px solid var(--b1);border-radius:2px;padding:10px 6px;text-align:center;cursor:pointer;transition:all .15s}
+.size-cell:hover{border-color:var(--b2)}
+.size-cell .sz-label{font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:4px}
+.size-cell .sz-count{font-family:var(--mono);font-size:18px;font-weight:300;color:var(--text)}
+.size-cell.low .sz-count{color:var(--warn)}
+.size-cell.out .sz-count{color:var(--danger)}
+
+.cat-tag{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:2px;text-transform:uppercase;letter-spacing:.12em}
+
+.scroll-x{overflow-x:auto}
+
+.gap{margin-bottom:24px}
+.gap-sm{margin-bottom:14px}
+.section-title{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+
+.inv-status{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px}
+.inv-status .bar{flex:1;height:4px;background:var(--b1);border-radius:2px;overflow:hidden}
+.inv-status .fill{height:100%;border-radius:2px;transition:width .4s}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+input[type=number]{-moz-appearance:textfield}
+
+.order-item-row{display:grid;grid-template-columns:2fr 0.8fr 1fr auto;gap:8px;margin-bottom:8px;padding:10px;background:var(--s2);border:1px solid var(--b1);border-radius:2px;align-items:end}
+.order-item-row .field{margin-bottom:0}
+.order-item-row .field label{font-size:8px;margin-bottom:4px}
+.order-item-row .field input,.order-item-row .field select{font-size:12px;padding:6px 10px}
+
+.status-select{background:var(--s2);border:1px solid var(--b1);color:var(--text);font-family:var(--mono);font-size:10px;padding:4px 8px;border-radius:2px;cursor:pointer}
+.status-select:focus{border-color:var(--ads)}
+.status-select option{padding:4px 8px}
+
+.status-badge{display:inline-block;padding:3px 10px;border-radius:2px;font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.1em;text-transform:uppercase}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sb-logo">
+    <div class="brand">TF<span>.</span>Studios</div>
+    <div class="sub">brand os</div>
+  </div>
+  <div class="sb-nav">
+    <div class="sb-section">overview</div>
+    <div class="nav-item active" data-page="dashboard"><span class="icon">◈</span> Dashboard</div>
+    <div class="sb-section">finance</div>
+    <div class="nav-item" data-page="bank"><span class="icon">◆</span> TF Bank</div>
+    <div class="nav-item" data-page="revenue"><span class="icon">↑</span> Revenue</div>
+    <div class="nav-item" data-page="expenses"><span class="icon">↓</span> Expenses</div>
+    <div class="sb-section">operations</div>
+    <div class="nav-item" data-page="inventory"><span class="icon">▦</span> Inventory</div>
+    <div class="nav-item" data-page="orders"><span class="icon">◎</span> Orders</div>
+    <div class="nav-item" data-page="influencers"><span class="icon">✦</span> Influencers</div>
+    <div class="sb-section">drops</div>
+    <div class="nav-item" data-page="drops"><span class="icon">◉</span> Drops</div>
+  </div>
+  <div class="sb-bottom">
+    <div class="sb-date" id="sb-date"></div>
+  </div>
+</nav>
+
+<!-- CONTENT -->
+<div class="content">
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="pg-header">
+    <div><h1>dashboard</h1><p>brand health at a glance</p></div>
+  </div>
+  <div class="pg-body">
+    <div class="grid4 gap">
+      <div class="card card-sm">
+        <h3>total revenue</h3>
+        <div class="kpi-val" id="d-total-rev">EGP 0</div>
+        <div class="kpi-sub" id="d-rev-days">0 days tracked</div>
+      </div>
+      <div class="card card-sm">
+        <h3>net balance</h3>
+        <div class="kpi-val" id="d-net">EGP 0</div>
+        <div class="kpi-sub">revenue minus expenses</div>
+      </div>
+      <div class="card card-sm">
+        <h3>total expenses</h3>
+        <div class="kpi-val" id="d-total-exp">EGP 0</div>
+        <div class="kpi-sub" id="d-exp-count">0 entries</div>
+      </div>
+      <div class="card card-sm">
+        <h3>ads budget left</h3>
+        <div class="kpi-val" id="d-ads-left">EGP 0</div>
+        <div class="kpi-sub">10% of revenue − ads spent</div>
+      </div>
+    </div>
+
+    <div class="grid3 gap">
+      <div class="card">
+        <h3>allocation</h3>
+        <div style="display:flex;flex-direction:column;gap:12px;margin-top:4px">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <span class="chip chip-blue">meta ads · 10%</span>
+              <span style="font-family:var(--mono);font-size:12px" id="alloc-ads">EGP 0</span>
+            </div>
+            <div class="prog-bar"><div class="prog-fill" style="background:var(--ads);width:10%" id="pb-ads"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <span class="chip chip-purple">reserve · 10%</span>
+              <span style="font-family:var(--mono);font-size:12px" id="alloc-res">EGP 0</span>
+            </div>
+            <div class="prog-bar"><div class="prog-fill" style="background:var(--rev);width:10%" id="pb-res"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <span class="chip chip-green">restock · 80%</span>
+              <span style="font-family:var(--mono);font-size:12px" id="alloc-rst">EGP 0</span>
+            </div>
+            <div class="prog-bar"><div class="prog-fill" style="background:var(--restock);width:80%" id="pb-rst"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>inventory overview</h3>
+        <div id="d-inv-overview" style="font-family:var(--mono);font-size:11px;color:var(--muted)">no products yet</div>
+      </div>
+      <div class="card">
+        <h3>recent drops</h3>
+        <div id="d-drops-list" style="font-family:var(--mono);font-size:11px;color:var(--muted)">no drops yet</div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <h3>recent expenses</h3>
+        <div id="d-recent-exp" style="font-family:var(--mono);font-size:11px;color:var(--muted)">no expenses yet</div>
+      </div>
+      <div class="card">
+        <h3>influencer gifting</h3>
+        <div id="d-inf-overview" style="font-family:var(--mono);font-size:11px;color:var(--muted)">no gifting logged yet</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TF BANK -->
+<div class="page" id="page-bank">
+  <div class="pg-header">
+    <div><h1>tf bank</h1><p>full financial picture — every dirham in and out</p></div>
+    <button class="btn btn-primary" onclick="openModal('modal-revenue')">+ log revenue</button>
+  </div>
+  <div class="pg-body">
+    <div class="grid4 gap">
+      <div class="card card-sm">
+        <h3>total in</h3>
+        <div class="kpi-val" style="color:var(--restock)" id="bk-in">EGP 0</div>
+        <div class="kpi-sub">all revenue</div>
+      </div>
+      <div class="card card-sm">
+        <h3>total out</h3>
+        <div class="kpi-val" style="color:var(--danger)" id="bk-out">EGP 0</div>
+        <div class="kpi-sub">all expenses</div>
+      </div>
+      <div class="card card-sm">
+        <h3>net</h3>
+        <div class="kpi-val" id="bk-net">EGP 0</div>
+        <div class="kpi-sub">in − out</div>
+      </div>
+      <div class="card card-sm">
+        <h3>reserve locked</h3>
+        <div class="kpi-val" style="color:var(--rev)" id="bk-reserve">EGP 0</div>
+        <div class="kpi-sub">10% of all revenue</div>
+      </div>
+    </div>
+
+    <div class="gap">
+      <div class="section-title">expenses by category</div>
+      <div class="grid4" id="bk-cat-grid">
+        <div class="card card-sm"><h3>ads</h3><div class="kpi-val chip-blue" id="bk-cat-ads" style="font-family:var(--mono);font-size:20px">EGP 0</div></div>
+        <div class="card card-sm"><h3>stock / inventory</h3><div class="kpi-val" id="bk-cat-stock" style="font-family:var(--mono);font-size:20px">EGP 0</div></div>
+        <div class="card card-sm"><h3>packaging</h3><div class="kpi-val" id="bk-cat-pack" style="font-family:var(--mono);font-size:20px">EGP 0</div></div>
+        <div class="card card-sm"><h3>other</h3><div class="kpi-val" id="bk-cat-other" style="font-family:var(--mono);font-size:20px">EGP 0</div></div>
+      </div>
+    </div>
+
+    <div class="tbl-wrap">
+      <div class="tbl-head">
+        <h3>full ledger</h3>
+        <button class="btn btn-ghost btn-sm" onclick="openModal('modal-expense')">+ add expense</button>
+      </div>
+      <div class="scroll-x">
+        <table>
+          <thead><tr><th>date</th><th>type</th><th>category</th><th>description</th><th>amount</th><th></th></tr></thead>
+          <tbody id="ledger-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- REVENUE -->
+<div class="page" id="page-revenue">
+  <div class="pg-header">
+    <div><h1>revenue</h1><p>daily revenue log + calendar view</p></div>
+    <button class="btn btn-primary" onclick="openModal('modal-revenue')">+ log day</button>
+  </div>
+  <div class="pg-body">
+    <div class="grid2 gap">
+      <div>
+        <div class="section-title">revenue calendar</div>
+        <div class="cal-wrap">
+          <div class="cal-hdr">
+            <div class="cal-title" id="cal-title">—</div>
+            <div style="display:flex;gap:4px">
+              <button class="cal-nav-btn" id="cal-prev">‹</button>
+              <button class="cal-nav-btn" id="cal-today">today</button>
+              <button class="cal-nav-btn" id="cal-next">›</button>
+            </div>
+          </div>
+          <div class="cal-day-row">
+            <div class="cal-dl">su</div><div class="cal-dl">mo</div><div class="cal-dl">tu</div>
+            <div class="cal-dl">we</div><div class="cal-dl">th</div><div class="cal-dl">fr</div><div class="cal-dl">sa</div>
+          </div>
+          <div class="cal-cells" id="cal-cells"></div>
+        </div>
+      </div>
+      <div>
+        <div class="section-title">selected day</div>
+        <div class="card" id="rev-day-panel">
+          <div style="font-family:var(--mono);font-size:11px;color:var(--muted)">click a day on the calendar</div>
+        </div>
+        <div class="gap-sm"></div>
+        <div class="section-title">allocation for selected day</div>
+        <div class="card" id="rev-alloc-panel" style="display:none">
+          <div style="display:flex;flex-direction:column;gap:10px" id="rev-alloc-inner"></div>
+        </div>
+      </div>
+    </div>
+    <div class="tbl-wrap">
+      <div class="tbl-head"><h3>all entries</h3><span class="td-muted" id="rev-count" style="font-family:var(--mono);font-size:10px"></span></div>
+      <div class="scroll-x">
+        <table>
+          <thead><tr><th>date</th><th>revenue</th><th>ads (10%)</th><th>reserve (10%)</th><th>restock (80%)</th><th>note</th><th></th></tr></thead>
+          <tbody id="rev-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EXPENSES -->
+<div class="page" id="page-expenses">
+  <div class="pg-header">
+    <div><h1>expenses</h1><p>every dirham out — ads, stock, packaging, misc</p></div>
+    <button class="btn btn-primary" onclick="openModal('modal-expense')">+ add expense</button>
+  </div>
+  <div class="pg-body">
+    <div class="grid4 gap">
+      <div class="card card-sm"><h3><span class="kpi-dot" style="background:var(--ads)"></span>meta ads</h3><div class="kpi-val" id="exp-ads">EGP 0</div></div>
+      <div class="card card-sm"><h3><span class="kpi-dot" style="background:var(--warn)"></span>stock / inventory</h3><div class="kpi-val" id="exp-stock">EGP 0</div></div>
+      <div class="card card-sm"><h3><span class="kpi-dot" style="background:var(--pink)"></span>packaging</h3><div class="kpi-val" id="exp-pack">EGP 0</div></div>
+      <div class="card card-sm"><h3><span class="kpi-dot" style="background:var(--muted)"></span>other</h3><div class="kpi-val" id="exp-other">EGP 0</div></div>
+    </div>
+    <div class="tbl-wrap">
+      <div class="tbl-head"><h3>expense log</h3><span id="exp-count" style="font-family:var(--mono);font-size:10px;color:var(--muted)"></span></div>
+      <div class="scroll-x">
+        <table>
+          <thead><tr><th>date</th><th>category</th><th>description</th><th>amount</th><th></th></tr></thead>
+          <tbody id="exp-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INVENTORY -->
+<div class="page" id="page-inventory">
+  <div class="pg-header">
+    <div><h1>inventory</h1><p>products, sizes, stock levels</p></div>
+    <button class="btn btn-primary" onclick="openModal('modal-product')">+ add product</button>
+  </div>
+  <div class="pg-body">
+    <div class="grid4 gap" id="inv-stats">
+      <div class="card card-sm"><h3>total products</h3><div class="kpi-val" id="inv-total-p">0</div></div>
+      <div class="card card-sm"><h3>total units</h3><div class="kpi-val" id="inv-total-u">0</div></div>
+      <div class="card card-sm"><h3>low stock</h3><div class="kpi-val" style="color:var(--warn)" id="inv-low">0</div><div class="kpi-sub">items ≤ 3 units</div></div>
+      <div class="card card-sm"><h3>out of stock</h3><div class="kpi-val" style="color:var(--danger)" id="inv-out">0</div><div class="kpi-sub">items at 0</div></div>
+    </div>
+    <div id="inv-products-wrap"></div>
+  </div>
+</div>
+
+<!-- ORDERS -->
+<div class="page" id="page-orders">
+  <div class="pg-header">
+    <div><h1>orders</h1><p>track every sale — cod & online</p></div>
+    <button class="btn btn-primary" onclick="openModal('modal-order')">+ add order</button>
+  </div>
+  <div class="pg-body">
+    <!-- Stats with percentages -->
+    <div class="grid6 gap">
+      <div class="card card-sm"><h3>total orders</h3><div class="kpi-val" id="ord-total">0</div></div>
+      <div class="card card-sm"><h3>confirmed</h3><div class="kpi-val" style="color:var(--restock)" id="ord-confirmed">0</div><div class="kpi-sub" id="ord-confirmed-pct">0%</div></div>
+      <div class="card card-sm"><h3>pending</h3><div class="kpi-val" style="color:var(--warn)" id="ord-pending">0</div><div class="kpi-sub" id="ord-pending-pct">0%</div></div>
+      <div class="card card-sm"><h3>rejected</h3><div class="kpi-val" style="color:var(--danger)" id="ord-rejected">0</div><div class="kpi-sub" id="ord-rejected-pct">0%</div></div>
+      <div class="card card-sm"><h3>cancelled</h3><div class="kpi-val" style="color:var(--muted)" id="ord-cancelled">0</div><div class="kpi-sub" id="ord-cancelled-pct">0%</div></div>
+      <div class="card card-sm"><h3>returned</h3><div class="kpi-val" style="color:var(--pink)" id="ord-returned">0</div><div class="kpi-sub" id="ord-returned-pct">0%</div></div>
+    </div>
+    <div class="tbl-wrap">
+      <div class="tbl-head"><h3>order log</h3></div>
+      <div class="scroll-x">
+        <table>
+          <thead><tr><th>#</th><th>date</th><th>client</th><th>phone</th><th>items</th><th>subtotal</th><th>shipping</th><th>total</th><th>confirm</th><th>fulfillment</th><th>note</th><th>actions</th></tr></thead>
+          <tbody id="ord-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INFLUENCERS -->
+<div class="page" id="page-influencers">
+  <div class="pg-header">
+    <div><h1>influencers</h1><p>gifting tracker — who got what</p></div>
+    <button class="btn btn-primary" onclick="openModal('modal-influencer')">+ add gifting</button>
+  </div>
+  <div class="pg-body">
+    <div class="grid3 gap">
+      <div class="card card-sm"><h3>total gifted</h3><div class="kpi-val" id="inf-total">0 units</div></div>
+      <div class="card card-sm"><h3>influencers</h3><div class="kpi-val" id="inf-count">0</div></div>
+      <div class="card card-sm"><h3>posted</h3><div class="kpi-val" style="color:var(--restock)" id="inf-posted">0</div></div>
+    </div>
+    <div class="tbl-wrap">
+      <div class="tbl-head"><h3>gifting log</h3></div>
+      <div class="scroll-x">
+        <table>
+          <thead><tr><th>date</th><th>influencer</th><th>platform</th><th>followers</th><th>item gifted</th><th>size</th><th>status</th><th>post link</th><th></th></tr></thead>
+          <tbody id="inf-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DROPS -->
+<div class="page" id="page-drops">
+  <div class="pg-header">
+    <div><h1>drops</h1><p>every release — tracked and archived</p></div>
+    <button class="btn btn-primary" onclick="openModal('modal-drop')">+ new drop</button>
+  </div>
+  <div class="pg-body">
+    <div id="drops-grid" class="grid2"></div>
+  </div>
+</div>
+
+</div><!-- /content -->
+</div><!-- /shell -->
+
+<!-- MODALS -->
+
+<!-- Revenue Modal -->
+<div class="modal-bg" id="modal-revenue">
+  <div class="modal">
+    <div class="modal-header"><h2>log revenue</h2><button class="modal-close" onclick="closeModal('modal-revenue')">×</button></div>
+    <div class="modal-body">
+      <div class="field-row c2">
+        <div class="field"><label>date</label><input type="date" id="rev-date"></div>
+        <div class="field"><label>amount (EGP)</label><div class="prefix-wrap"><span class="pfx">E£</span><input type="number" id="rev-amount" placeholder="0" min="0"></div></div>
+      </div>
+      <div class="field"><label>note (optional)</label><textarea id="rev-note" placeholder="drop 02 launch, promo day..."></textarea></div>
+      <div class="btn-row"><button class="btn btn-primary" onclick="saveRevenue()">save entry</button><button class="btn btn-ghost" onclick="closeModal('modal-revenue')">cancel</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Expense Modal -->
+<div class="modal-bg" id="modal-expense">
+  <div class="modal">
+    <div class="modal-header"><h2>add expense</h2><button class="modal-close" onclick="closeModal('modal-expense')">×</button></div>
+    <div class="modal-body">
+      <div class="field-row c2">
+        <div class="field"><label>date</label><input type="date" id="exp-date"></div>
+        <div class="field"><label>category</label>
+          <select id="exp-cat">
+            <option value="ads">meta ads</option>
+            <option value="stock">stock / inventory</option>
+            <option value="packaging">packaging</option>
+            <option value="shipping">shipping</option>
+            <option value="design">design / creative</option>
+            <option value="other">other</option>
+          </select>
+        </div>
+      </div>
+      <div class="field"><label>description</label><input type="text" id="exp-desc" placeholder="e.g. drop 02 ad campaign, hoodie restock..."></div>
+      <div class="field"><label>amount (EGP)</label><div class="prefix-wrap"><span class="pfx">E£</span><input type="number" id="exp-amount" placeholder="0" min="0"></div></div>
+      <div class="btn-row"><button class="btn btn-primary" onclick="saveExpense()">save expense</button><button class="btn btn-ghost" onclick="closeModal('modal-expense')">cancel</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Product Modal -->
+<div class="modal-bg" id="modal-product">
+  <div class="modal">
+    <div class="modal-header"><h2 id="prod-modal-title">add product</h2><button class="modal-close" onclick="closeModal('modal-product')">×</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="prod-edit-id">
+      <div class="field-row c2">
+        <div class="field"><label>product name</label><input type="text" id="prod-name" placeholder="e.g. TF Hoodie S26"></div>
+        <div class="field"><label>drop / collection</label><input type="text" id="prod-drop" placeholder="e.g. Drop 02"></div>
+      </div>
+      <div class="field-row c2">
+        <div class="field"><label>category</label>
+          <select id="prod-cat">
+            <option value="hoodie">hoodie</option>
+            <option value="tee">t-shirt</option>
+            <option value="jacket">jacket</option>
+            <option value="pants">pants</option>
+            <option value="accessory">accessory</option>
+            <option value="other">other</option>
+          </select>
+        </div>
+        <div class="field"><label>price (EGP)</label><div class="prefix-wrap"><span class="pfx">E£</span><input type="number" id="prod-price" placeholder="0" min="0"></div></div>
+      </div>
+      <div class="field"><label>sizes &amp; stock</label></div>
+      <div class="field-row c3">
+        <div class="field"><label>S</label><input type="number" id="sz-s" placeholder="0" min="0"></div>
+        <div class="field"><label>M</label><input type="number" id="sz-m" placeholder="0" min="0"></div>
+        <div class="field"><label>L</label><input type="number" id="sz-l" placeholder="0" min="0"></div>
+      </div>
+      <div class="field"><label>cost price (EGP) — what you paid</label><div class="prefix-wrap"><span class="pfx">E£</span><input type="number" id="prod-cost" placeholder="0" min="0"></div></div>
+      <div class="btn-row"><button class="btn btn-primary" onclick="saveProduct()">save product</button><button class="btn btn-ghost" onclick="closeModal('modal-product')">cancel</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Order Modal -->
+<div class="modal-bg" id="modal-order">
+  <div class="modal">
+    <div class="modal-header"><h2 id="order-modal-title">add order</h2><button class="modal-close" onclick="closeModal('modal-order')">×</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="ord-edit-id">
+      <div class="field-row c2">
+        <div class="field"><label>shopify order #</label><input type="text" id="ord-code" placeholder="#1101"></div>
+        <div class="field"><label>date</label><input type="date" id="ord-date"></div>
+      </div>
+      <div class="field-row c2">
+        <div class="field"><label>client name</label><input type="text" id="ord-client" placeholder="name"></div>
+        <div class="field"><label>phone</label><input type="text" id="ord-phone" placeholder="01x xxx xxxx"></div>
+      </div>
+      <div class="field-row c2">
+        <div class="field"><label>email</label><input type="email" id="ord-email" placeholder="client@email.com"></div>
+        <div class="field"><label>address</label><input type="text" id="ord-address" placeholder="city / area"></div>
+      </div>
+      <div style="margin:14px 0 8px;display:flex;align-items:center;justify-content:space-between">
+        <label style="font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)">order items</label>
+        <button class="btn btn-ghost btn-sm" onclick="addOrderItemRow()">+ add item</button>
+      </div>
+      <div id="ord-items-wrap"></div>
+      <div style="background:var(--s2);border:1px solid var(--b1);border-radius:2px;padding:14px;margin:14px 0">
+        <div class="field-row c2" style="margin-bottom:10px">
+          <div class="field" style="margin:0"><label>items subtotal (EGP)</label><div class="prefix-wrap"><span class="pfx">E£</span><input type="number" id="ord-subtotal" placeholder="0" min="0" readonly style="background:var(--s3);cursor:not-allowed"></div></div>
+          <div class="field" style="margin:0"><label>shipping fee (EGP)</label><div class="prefix-wrap"><span class="pfx">E£</span><input type="number" id="ord-shipping" placeholder="0" min="0" value="0" oninput="calcOrderTotal()"></div></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid var(--b1)">
+          <span style="font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)">order total</span>
+          <span style="font-family:var(--mono);font-size:18px;color:var(--text)" id="ord-total-display">EGP 0</span>
+        </div>
+      </div>
+      <div class="field-row c2">
+        <div class="field"><label>confirmation status</label>
+          <select id="ord-confirm">
+            <option value="pending">pending</option>
+            <option value="confirmed">confirmed</option>
+            <option value="rejected">rejected</option>
+          </select>
+        </div>
+        <div class="field"><label>fulfillment status</label>
+          <select id="ord-status">
+            <option value="pending">pending</option>
+            <option value="processing">processing</option>
+            <option value="shipped">shipped</option>
+            <option value="delivered">delivered</option>
+            <option value="cancelled">cancelled</option>
+            <option value="returned">returned</option>
+          </select>
+        </div>
+      </div>
+      <div class="field"><label>note</label><input type="text" id="ord-note" placeholder="cod, prepaid, special request..."></div>
+      <div class="btn-row"><button class="btn btn-primary" onclick="saveOrder()">save order</button><button class="btn btn-ghost" onclick="closeModal('modal-order')">cancel</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Influencer Modal -->
+<div class="modal-bg" id="modal-influencer">
+  <div class="modal">
+    <div class="modal-header"><h2>log gifting</h2><button class="modal-close" onclick="closeModal('modal-influencer')">×</button></div>
+    <div class="modal-body">
+      <div class="field-row c2">
+        <div class="field"><label>date</label><input type="date" id="inf-date"></div>
+        <div class="field"><label>influencer name / @</label><input type="text" id="inf-name" placeholder="@handle"></div>
+      </div>
+      <div class="field-row c2">
+        <div class="field"><label>platform</label>
+          <select id="inf-platform"><option>instagram</option><option>tiktok</option><option>both</option></select>
+        </div>
+        <div class="field"><label>followers (approx)</label><input type="text" id="inf-followers" placeholder="50k"></div>
+      </div>
+      <div class="field-row c2">
+        <div class="field"><label>item gifted</label><input type="text" id="inf-item" placeholder="TF Hoodie S26"></div>
+        <div class="field"><label>size</label>
+          <select id="inf-size"><option>S</option><option selected>M</option><option>L</option></select>
+        </div>
+      </div>
+      <div class="field-row c2">
+        <div class="field"><label>status</label>
+          <select id="inf-status"><option value="sent">sent</option><option value="posted">posted ✓</option><option value="pending">pending</option><option value="ghosted">ghosted</option></select>
+        </div>
+        <div class="field"><label>post link (optional)</label><input type="text" id="inf-link" placeholder="https://..."></div>
+      </div>
+      <div class="btn-row"><button class="btn btn-primary" onclick="saveInfluencer()">save</button><button class="btn btn-ghost" onclick="closeModal('modal-influencer')">cancel</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Drop Modal -->
+<div class="modal-bg" id="modal-drop">
+  <div class="modal">
+    <div class="modal-header"><h2>new drop</h2><button class="modal-close" onclick="closeModal('modal-drop')">×</button></div>
+    <div class="modal-body">
+      <div class="field-row c2">
+        <div class="field"><label>drop name</label><input type="text" id="drop-name" placeholder="Drop 02 / S26D2"></div>
+        <div class="field"><label>drop date</label><input type="date" id="drop-date"></div>
+      </div>
+      <div class="field"><label>description</label><textarea id="drop-desc" placeholder="what's in this drop..."></textarea></div>
+      <div class="field-row c2">
+        <div class="field"><label>status</label>
+          <select id="drop-status"><option value="upcoming">upcoming</option><option value="live">live</option><option value="sold out">sold out</option><option value="archived">archived</option></select>
+        </div>
+        <div class="field"><label>total units</label><input type="number" id="drop-units" placeholder="0" min="0"></div>
+      </div>
+      <div class="btn-row"><button class="btn btn-primary" onclick="saveDrop()">save drop</button><button class="btn btn-ghost" onclick="closeModal('modal-drop')">cancel</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Restock Modal -->
+<div class="modal-bg" id="modal-restock">
+  <div class="modal">
+    <div class="modal-header"><h2 id="restock-title">restock</h2><button class="modal-close" onclick="closeModal('modal-restock')">×</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="restock-prod-id">
+      <div class="field-row c3">
+        <div class="field"><label>S</label><input type="number" id="rst-s" placeholder="0" min="0"></div>
+        <div class="field"><label>M</label><input type="number" id="rst-m" placeholder="0" min="0"></div>
+        <div class="field"><label>L</label><input type="number" id="rst-l" placeholder="0" min="0"></div>
+      </div>
+      <div class="btn-row"><button class="btn btn-primary" onclick="doRestock()">add stock</button><button class="btn btn-ghost" onclick="closeModal('modal-restock')">cancel</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+// ════════════════════════════════════ FIREBASE CONFIG ════
+// 🔥 REPLACE THIS WITH YOUR FIREBASE CONFIG FROM STEP 2 🔥
+const firebaseConfig = {
+  apiKey: "AIzaSyCdiZcXQ0WzICcPgb-fNZC29VApoJqW99k",
+  authDomain: "tf-studios-os.firebaseapp.com",
+  projectId: "tf-studios-os",
+  storageBucket: "tf-studios-os.firebasestorage.app",
+  messagingSenderId: "930466156242",
+  appId: "1:930466156242:web:47981818a7a7c9dcda270b"
+};
+
+// Import Firebase modules
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getFirestore, doc, setDoc, getDoc, onSnapshot, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+// ════════════════════════════════════ STATE ════
+const DB = {
+  revenue: {},
+  expenses: [],
+  products: [],
+  orders: [],
+  influencers: [],
+  drops: [],
+};
+
+let currentUser = null;
+let unsubscribe = null;
+
+// ════════════════════════════════════ AUTH UI ════
+function setupAuth() {
+  const authDiv = document.createElement('div');
+  authDiv.style.cssText = `
+    position: fixed;
+    top: 0;
+    right: 0;
+    padding: 10px 20px;
+    background: var(--s1);
+    border-bottom: 1px solid var(--b1);
+    border-left: 1px solid var(--b1);
+    border-radius: 0 0 0 4px;
+    z-index: 1000;
+    font-family: var(--mono);
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  `;
+  authDiv.innerHTML = `
+    <span id="auth-status" style="color:var(--muted)">Connecting...</span>
+    <button id="auth-btn" class="btn btn-ghost btn-sm">Sign In</button>
+  `;
+  document.body.prepend(authDiv);
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      currentUser = user;
+      document.getElementById('auth-status').textContent = `👤 ${user.displayName || user.email}`;
+      document.getElementById('auth-btn').textContent = 'Sign Out';
+      loadData();
+    } else {
+      currentUser = null;
+      document.getElementById('auth-status').textContent = '🔒 Not signed in (read-only)';
+      document.getElementById('auth-btn').textContent = 'Sign In with Google';
+      loadFromLocalStorage();
+    }
+  });
+
+  document.getElementById('auth-btn').addEventListener('click', () => {
+    if (currentUser) {
+      auth.signOut();
+    } else {
+      signInWithPopup(auth, provider).catch(console.error);
+    }
+  });
+}
+
+// ════════════════════════════════════ FIRESTORE ════
+async function loadData() {
+  if (!currentUser) return;
+  
+  const docRef = doc(db, 'brandData', 'tfStudios');
+  
+  if (unsubscribe) unsubscribe();
+  unsubscribe = onSnapshot(docRef, (docSnap) => {
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      Object.assign(DB, data);
+      ['expenses', 'products', 'orders', 'influencers', 'drops'].forEach(key => {
+        if (!Array.isArray(DB[key])) DB[key] = [];
+      });
+      if (typeof DB.revenue !== 'object') DB.revenue = {};
+      saveToLocalStorage();
+      refreshAll();
+      toast('📡 Synced with cloud');
+    } else {
+      uploadToFirestore();
+    }
+  });
+}
+
+async function uploadToFirestore() {
+  if (!currentUser) return;
+  try {
+    await setDoc(doc(db, 'brandData', 'tfStudios'), DB);
+    toast('☁️ Data uploaded to cloud');
+  } catch (e) {
+    console.error('Upload error:', e);
+    toast('❌ Upload failed - check console');
+  }
+}
+
+async function syncToCloud() {
+  if (!currentUser) {
+    toast('🔒 Sign in to sync');
+    return;
+  }
+  try {
+    await setDoc(doc(db, 'brandData', 'tfStudios'), DB);
+    toast('☁️ Synced to cloud ✓');
+  } catch (e) {
+    console.error('Sync error:', e);
+    toast('❌ Sync failed - check console');
+  }
+}
+
+// ════════════════════════════════════ LOCAL STORAGE ════
+function loadFromLocalStorage() {
+  try {
+    const s = localStorage.getItem('tf_os_v2');
+    if (s) Object.assign(DB, JSON.parse(s));
+    ['expenses', 'products', 'orders', 'influencers', 'drops'].forEach(key => {
+      if (!Array.isArray(DB[key])) DB[key] = [];
+    });
+    if (typeof DB.revenue !== 'object') DB.revenue = {};
+    refreshAll();
+  } catch(e) { console.error(e); }
+}
+
+function saveToLocalStorage() {
+  localStorage.setItem('tf_os_v2', JSON.stringify(DB));
+}
+
+function refreshAll() {
+  renderDashboard();
+  const page = activePage();
+  if (page === 'dashboard') renderDashboard();
+  else if (page === 'bank') renderBank();
+  else if (page === 'revenue') { renderRevenue(); renderCal(); }
+  else if (page === 'expenses') renderExpenses();
+  else if (page === 'inventory') renderInventory();
+  else if (page === 'orders') renderOrders();
+  else if (page === 'influencers') renderInfluencers();
+  else if (page === 'drops') renderDrops();
+}
+
+// ════════════════════════════════════ HELPERS ════
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,5); }
+function fmt(n) { return 'EGP ' + Number(n||0).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}); }
+function fmtN(n) { return Number(n||0).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}); }
+function toKey(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function keyToDate(k) { const [y,m,d]=k.split('-').map(Number); return new Date(y,m-1,d); }
+function fmtDate(k) { return keyToDate(k).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
+function todayKey() { return toKey(new Date()); }
+function setVal(id,v) { const el=document.getElementById(id); if(el) el.textContent=v; }
+
+const CAT_COLORS = { ads:'chip-blue', stock:'chip-amber', packaging:'chip-pink', shipping:'chip-purple', design:'chip-green', other:'chip-blue' };
+const CAT_LABELS = { ads:'meta ads', stock:'stock', packaging:'packaging', shipping:'shipping', design:'design', other:'other' };
+
+function chip(label, colorClass) { return `<span class="chip ${colorClass||'chip-blue'}">${label}</span>`; }
+
+function getStatusClass(status) {
+  const map = {
+    'pending': 'status-pending',
+    'confirmed': 'status-confirmed',
+    'processing': 'status-processing',
+    'shipped': 'status-shipped',
+    'delivered': 'status-delivered',
+    'cancelled': 'status-cancelled',
+    'returned': 'status-returned',
+    'rejected': 'status-rejected'
+  };
+  return map[status] || 'status-pending';
+}
+
+function statusBadge(status) {
+  return `<span class="status-badge ${getStatusClass(status)}">${status}</span>`;
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// ════════════════════════════════════ NAVIGATION ════
+document.querySelectorAll('.nav-item').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('page-' + el.dataset.page).classList.add('active');
+    renderPage(el.dataset.page);
+  });
+});
+
+function renderPage(name) {
+  if (name === 'dashboard') renderDashboard();
+  else if (name === 'bank') renderBank();
+  else if (name === 'revenue') { renderRevenue(); renderCal(); }
+  else if (name === 'expenses') renderExpenses();
+  else if (name === 'inventory') renderInventory();
+  else if (name === 'orders') renderOrders();
+  else if (name === 'influencers') renderInfluencers();
+  else if (name === 'drops') renderDrops();
+}
+
+function activePage() {
+  const active = document.querySelector('.nav-item.active');
+  return active ? active.dataset.page : 'dashboard';
+}
+
+// ════════════════════════════════════ MODAL ════
+window.openModal = function(id) {
+  const today = todayKey();
+  const m = document.getElementById(id);
+  m.querySelectorAll('input[type=date]').forEach(el => { if(!el.value) el.value = today; });
+  m.classList.add('open');
+}
+window.closeModal = function(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-bg').forEach(m => {
+  m.addEventListener('click', e => { if(e.target === m) m.classList.remove('open'); });
+});
+
+// ════════════════════════════════════ REVENUE ════
+let calYear, calMonth, calSelected;
+
+function totalRevenue() { return Object.values(DB.revenue).reduce((s,e)=>s+(e.amount||0),0); }
+function totalExpenses() { return DB.expenses.reduce((s,e)=>s+(e.amount||0),0); }
+
+window.saveRevenue = function() {
+  const date = document.getElementById('rev-date').value;
+  const amount = parseFloat(document.getElementById('rev-amount').value);
+  const note = document.getElementById('rev-note').value.trim();
+  if (!date || !amount || amount <= 0) return toast('enter a valid date and amount');
+  DB.revenue[date] = { amount, note };
+  saveToLocalStorage();
+  syncToCloud();
+  closeModal('modal-revenue');
+  document.getElementById('rev-note').value = '';
+  document.getElementById('rev-amount').value = '';
+  refreshAll();
+  toast('revenue saved ✓');
+};
+
+window.deleteRevenue = function(key) {
+  if (!confirm('delete this entry?')) return;
+  delete DB.revenue[key];
+  saveToLocalStorage();
+  syncToCloud();
+  refreshAll();
+  toast('deleted');
+};
+
+function renderRevenue() {
+  const keys = Object.keys(DB.revenue).sort((a,b)=>b.localeCompare(a));
+  setVal('rev-count', keys.length + ' entries');
+  const tbody = document.getElementById('rev-body');
+  if (!tbody) return;
+  tbody.innerHTML = keys.length ? keys.map(k => {
+    const e = DB.revenue[k];
+    const a = e.amount;
+    return `<tr>
+      <td class="td-muted">${fmtDate(k)}</td>
+      <td>${fmt(a)}</td>
+      <td style="color:var(--ads)">${fmt(a*.1)}</td>
+      <td style="color:var(--rev)">${fmt(a*.1)}</td>
+      <td style="color:var(--restock)">${fmt(a*.8)}</td>
+      <td class="td-muted" style="font-size:11px">${e.note||'—'}</td>
+      <td class="td-del" onclick="deleteRevenue('${k}')">✕</td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="7" class="empty-state">no revenue entries yet</td></tr>';
+}
+
+// ════════════════════════════════════ CALENDAR ════
+function renderCal() {
+  if (!calYear) { const n=new Date(); calYear=n.getFullYear(); calMonth=n.getMonth(); calSelected=todayKey(); }
+  const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const el = document.getElementById('cal-title');
+  if (el) el.textContent = `${MONTHS[calMonth]} ${calYear}`;
+  const grid = document.getElementById('cal-cells');
+  if (!grid) return;
+  grid.innerHTML='';
+  const first = new Date(calYear,calMonth,1).getDay();
+  const days = new Date(calYear,calMonth+1,0).getDate();
+  const today = todayKey();
+  for(let i=0;i<first;i++){const c=document.createElement('div');c.className='cal-cell cal-empty';grid.appendChild(c);}
+  for(let d=1;d<=days;d++){
+    const key=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const c=document.createElement('div');
+    c.className='cal-cell'+(key===today?' cal-today':'')+(DB.revenue[key]?' cal-has':'')+(key===calSelected?' cal-sel':'');
+    c.textContent=d;
+    c.addEventListener('click',()=>{calSelected=key;renderCal();renderDayPanel(key);});
+    grid.appendChild(c);
+  }
+  if (calSelected) renderDayPanel(calSelected);
+}
+
+function renderDayPanel(key) {
+  const panel = document.getElementById('rev-day-panel');
+  const allocPanel = document.getElementById('rev-alloc-panel');
+  const allocInner = document.getElementById('rev-alloc-inner');
+  if (!panel) return;
+  const e = DB.revenue[key];
+  const d = keyToDate(key);
+  const label = d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  if (!e) {
+    panel.innerHTML = `<div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:12px">${label}</div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--muted)">no entry — click below to log</div>
+      <div class="btn-row" style="margin-top:14px"><button class="btn btn-primary btn-sm" onclick="prefillRevDate('${key}')">+ log this day</button></div>`;
+    if(allocPanel) allocPanel.style.display='none';
+  } else {
+    panel.innerHTML = `<div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:8px">${label}</div>
+      <div style="font-family:var(--mono);font-size:26px;font-weight:300;margin-bottom:6px">${fmt(e.amount)}</div>
+      ${e.note?`<div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:12px">${e.note}</div>`:''}
+      <div class="btn-row"><button class="btn btn-ghost btn-sm" onclick="prefillRevDate('${key}')">edit</button><button class="btn btn-danger btn-sm" onclick="deleteRevenue('${key}')">delete</button></div>`;
+    if(allocPanel) {
+      allocPanel.style.display='block';
+      allocInner.innerHTML = `
+        <div style="display:flex;justify-content:space-between"><span class="chip chip-blue">meta ads 10%</span><span style="font-family:var(--mono);font-size:12px">${fmt(e.amount*.1)}</span></div>
+        <div style="display:flex;justify-content:space-between"><span class="chip chip-purple">reserve 10%</span><span style="font-family:var(--mono);font-size:12px">${fmt(e.amount*.1)}</span></div>
+        <div style="display:flex;justify-content:space-between"><span class="chip chip-green">restock 80%</span><span style="font-family:var(--mono);font-size:12px">${fmt(e.amount*.8)}</span></div>`;
+    }
+  }
+}
+
+window.prefillRevDate = function(key) {
+  document.getElementById('rev-date').value = key;
+  const e = DB.revenue[key];
+  if (e) { document.getElementById('rev-amount').value = e.amount; document.getElementById('rev-note').value = e.note||''; }
+  openModal('modal-revenue');
+};
+
+document.getElementById('cal-prev').addEventListener('click',()=>{calMonth--;if(calMonth<0){calMonth=11;calYear--;}renderCal();});
+document.getElementById('cal-next').addEventListener('click',()=>{calMonth++;if(calMonth>11){calMonth=0;calYear++;}renderCal();});
+document.getElementById('cal-today').addEventListener('click',()=>{const n=new Date();calYear=n.getFullYear();calMonth=n.getMonth();calSelected=todayKey();renderCal();});
+
+// ════════════════════════════════════ EXPENSES ════
+window.saveExpense = function() {
+  const date=document.getElementById('exp-date').value;
+  const cat=document.getElementById('exp-cat').value;
+  const desc=document.getElementById('exp-desc').value.trim();
+  const amount=parseFloat(document.getElementById('exp-amount').value);
+  if(!date||!amount||amount<=0) return toast('fill all required fields');
+  DB.expenses.push({id:uid(),date,cat,desc,amount});
+  DB.expenses.sort((a,b)=>b.date.localeCompare(a.date));
+  saveToLocalStorage();
+  syncToCloud();
+  closeModal('modal-expense');
+  document.getElementById('exp-desc').value='';
+  document.getElementById('exp-amount').value='';
+  refreshAll();
+  toast('expense saved ✓');
+};
+
+window.deleteExpense = function(id) {
+  if(!confirm('delete this expense?')) return;
+  DB.expenses = DB.expenses.filter(e=>e.id!==id);
+  saveToLocalStorage();
+  syncToCloud();
+  refreshAll();
+  toast('deleted');
+};
+
+function renderExpenses() {
+  const cats = {ads:0,stock:0,packaging:0,other:0};
+  DB.expenses.forEach(e=>{
+    if(e.cat==='ads') cats.ads+=e.amount;
+    else if(e.cat==='stock') cats.stock+=e.amount;
+    else if(e.cat==='packaging') cats.pack+=e.amount;
+    else cats.other+=e.amount;
+  });
+  setVal('exp-ads',fmt(cats.ads));
+  setVal('exp-stock',fmt(cats.stock));
+  setVal('exp-pack',fmt(cats.pack||0));
+  setVal('exp-other',fmt(cats.other));
+  setVal('exp-count', DB.expenses.length+' entries');
+  const tbody = document.getElementById('exp-body');
+  if(!tbody) return;
+  tbody.innerHTML = DB.expenses.length ? DB.expenses.map(e=>`<tr>
+    <td class="td-muted">${fmtDate(e.date)}</td>
+    <td>${chip(CAT_LABELS[e.cat]||e.cat, CAT_COLORS[e.cat]||'chip-blue')}</td>
+    <td>${e.desc||'—'}</td>
+    <td style="color:var(--danger)">${fmt(e.amount)}</td>
+    <td class="td-del" onclick="deleteExpense('${e.id}')">✕</td>
+  </tr>`).join('') : '<tr><td colspan="5" class="empty-state">no expenses yet</td></tr>';
+}
+
+// ════════════════════════════════════ BANK ════
+function renderBank() {
+  const totalRev = totalRevenue();
+  const totalExp = totalExpenses();
+  setVal('bk-in', fmt(totalRev));
+  setVal('bk-out', fmt(totalExp));
+  setVal('bk-net', fmt(totalRev - totalExp));
+  setVal('bk-reserve', fmt(totalRev * .1));
+  const cats={ads:0,stock:0,packaging:0,other:0};
+  DB.expenses.forEach(e=>{
+    if(e.cat==='ads') cats.ads+=e.amount;
+    else if(e.cat==='stock') cats.stock+=e.amount;
+    else if(e.cat==='packaging') cats.packaging+=e.amount;
+    else cats.other+=e.amount;
+  });
+  setVal('bk-cat-ads',fmt(cats.ads));
+  setVal('bk-cat-stock',fmt(cats.stock));
+  setVal('bk-cat-pack',fmt(cats.packaging||0));
+  setVal('bk-cat-other',fmt(cats.other));
+  const rows = [];
+  Object.entries(DB.revenue).forEach(([k,e])=>rows.push({date:k,type:'in',cat:'revenue',desc:e.note||'revenue',amount:e.amount}));
+  DB.expenses.forEach(e=>rows.push({date:e.date,type:'out',cat:e.cat,desc:e.desc,amount:e.amount,id:e.id}));
+  rows.sort((a,b)=>b.date.localeCompare(a.date));
+  const tbody = document.getElementById('ledger-body');
+  if(!tbody) return;
+  tbody.innerHTML = rows.length ? rows.map(r=>`<tr>
+    <td class="td-muted">${fmtDate(r.date)}</td>
+    <td>${r.type==='in'?'<span style="color:var(--restock)">↑ in</span>':'<span style="color:var(--danger)">↓ out</span>'}</td>
+    <td>${chip(CAT_LABELS[r.cat]||r.cat, r.type==='in'?'chip-green':CAT_COLORS[r.cat]||'chip-blue')}</td>
+    <td>${r.desc||'—'}</td>
+    <td style="color:${r.type==='in'?'var(--restock)':'var(--danger)'}">${r.type==='in'?'+':'−'}${fmt(r.amount)}</td>
+    <td>${r.id?`<span class="td-del" onclick="deleteExpense('${r.id}')">✕</span>`:''}</td>
+  </tr>`).join('') : '<tr><td colspan="6" class="empty-state">no transactions yet</td></tr>';
+}
+
+// ════════════════════════════════════ INVENTORY ════
+window.saveProduct = function() {
+  const id = document.getElementById('prod-edit-id').value || uid();
+  const name = document.getElementById('prod-name').value.trim();
+  if(!name) return toast('product name required');
+  const sizes = {S:parseInt(document.getElementById('sz-s').value)||0,M:parseInt(document.getElementById('sz-m').value)||0,L:parseInt(document.getElementById('sz-l').value)||0};
+  const prod = {id,name,drop:document.getElementById('prod-drop').value.trim(),cat:document.getElementById('prod-cat').value,price:parseFloat(document.getElementById('prod-price').value)||0,cost:parseFloat(document.getElementById('prod-cost').value)||0,sizes};
+  const idx = DB.products.findIndex(p=>p.id===id);
+  if(idx>=0) DB.products[idx]=prod; else DB.products.push(prod);
+  saveToLocalStorage();
+  syncToCloud();
+  closeModal('modal-product');
+  ['prod-name','prod-drop','prod-price','prod-cost','prod-edit-id','sz-s','sz-m','sz-l'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
+  renderInventory(); renderDashboard(); toast('product saved ✓');
+};
+
+window.openEditProduct = function(id) {
+  const p = DB.products.find(p=>p.id===id);
+  if(!p) return;
+  document.getElementById('prod-modal-title').textContent='edit product';
+  document.getElementById('prod-edit-id').value=p.id;
+  document.getElementById('prod-name').value=p.name;
+  document.getElementById('prod-drop').value=p.drop||'';
+  document.getElementById('prod-cat').value=p.cat;
+  document.getElementById('prod-price').value=p.price||'';
+  document.getElementById('prod-cost').value=p.cost||'';
+  document.getElementById('sz-s').value=p.sizes.S||'';
+  document.getElementById('sz-m').value=p.sizes.M||'';
+  document.getElementById('sz-l').value=p.sizes.L||'';
+  openModal('modal-product');
+};
+
+window.openRestock = function(id) {
+  const p = DB.products.find(p=>p.id===id);
+  if(!p) return;
+  document.getElementById('restock-prod-id').value=id;
+  document.getElementById('restock-title').textContent='restock: '+p.name;
+  ['s','m','l'].forEach(s=>document.getElementById('rst-'+s).value='');
+  openModal('modal-restock');
+};
+
+window.doRestock = function() {
+  const id = document.getElementById('restock-prod-id').value;
+  const p = DB.products.find(p=>p.id===id);
+  if(!p) return;
+  const add={S:parseInt(document.getElementById('rst-s').value)||0,M:parseInt(document.getElementById('rst-m').value)||0,L:parseInt(document.getElementById('rst-l').value)||0};
+  Object.keys(add).forEach(s=>p.sizes[s]=(p.sizes[s]||0)+add[s]);
+  saveToLocalStorage();
+  syncToCloud();
+  closeModal('modal-restock'); renderInventory(); toast('restocked ✓');
+};
+
+window.deleteProduct = function(id) {
+  if(!confirm('delete this product?')) return;
+  DB.products = DB.products.filter(p=>p.id!==id);
+  saveToLocalStorage();
+  syncToCloud();
+  renderInventory(); renderDashboard(); toast('deleted');
+};
+
+function renderInventory() {
+  const SIZES = ['S','M','L'];
+  let totalUnits=0, lowCount=0, outCount=0;
+  DB.products.forEach(p=>{
+    SIZES.forEach(s=>{
+      const q=p.sizes[s]||0;
+      totalUnits+=q;
+      if(q===0) outCount++;
+      else if(q<=3) lowCount++;
+    });
+  });
+  setVal('inv-total-p',DB.products.length);
+  setVal('inv-total-u',totalUnits);
+  setVal('inv-low',lowCount);
+  setVal('inv-out',outCount);
+  const wrap = document.getElementById('inv-products-wrap');
+  if(!wrap) return;
+  if(!DB.products.length){wrap.innerHTML='<div class="empty-state" style="padding:60px 0">no products yet — add your first item</div>';return;}
+  wrap.innerHTML = DB.products.map(p=>{
+    const totalProdUnits = SIZES.reduce((s,sz)=>s+(p.sizes[sz]||0),0);
+    const sizeHtml = SIZES.map(s=>{
+      const q=p.sizes[s]||0;
+      const cls=q===0?'out':q<=3?'low':'';
+      return `<div class="size-cell ${cls}"><div class="sz-label">${s}</div><div class="sz-count">${q}</div></div>`;
+    }).join('');
+    return `<div class="card gap" style="margin-bottom:16px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px">
+        <div>
+          <div style="font-size:15px;font-weight:500;margin-bottom:4px">${p.name}</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+            ${p.drop?chip(p.drop,'chip-purple'):''}
+            ${chip(p.cat,'chip-blue')}
+            <span style="font-family:var(--mono);font-size:10px;color:var(--muted)">${totalProdUnits} units total</span>
+            ${p.price?`<span style="font-family:var(--mono);font-size:10px;color:var(--muted)">sell: ${fmt(p.price)}</span>`:''}
+            ${p.cost?`<span style="font-family:var(--mono);font-size:10px;color:var(--muted)">cost: ${fmt(p.cost)}</span>`:''}
+          </div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm" onclick="openRestock('${p.id}')">+ restock</button>
+          <button class="btn btn-ghost btn-sm" onclick="openEditProduct('${p.id}')">edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.id}')">✕</button>
+        </div>
+      </div>
+      <div class="size-grid">${sizeHtml}</div>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════ ORDERS ════
+let orderItems = [];
+
+window.addOrderItemRow = function(name = '', size = 'M', price = '') {
+  const wrap = document.getElementById('ord-items-wrap');
+  const row = document.createElement('div');
+  row.className = 'order-item-row';
+  row.innerHTML = `
+    <div class="field"><label>item name</label><input type="text" class="oi-name" value="${name}" placeholder="product name" oninput="calcOrderTotal()"></div>
+    <div class="field"><label>size</label>
+      <select class="oi-size" onchange="calcOrderTotal()">
+        <option value="S" ${size==='S'?'selected':''}>S</option>
+        <option value="M" ${size==='M'?'selected':''}>M</option>
+        <option value="L" ${size==='L'?'selected':''}>L</option>
+      </select>
+    </div>
+    <div class="field"><label>price (EGP)</label>
+      <div class="prefix-wrap"><span class="pfx">E£</span>
+        <input type="number" class="oi-price" value="${price}" placeholder="0" min="0" oninput="calcOrderTotal()">
+      </div>
+    </div>
+    <button class="btn-remove-item" onclick="removeOrderItem(this)">✕</button>
+  `;
+  wrap.appendChild(row);
+  calcOrderTotal();
+};
+
+window.removeOrderItem = function(btn) {
+  btn.closest('.order-item-row').remove();
+  calcOrderTotal();
+};
+
+function getOrderItems() {
+  const rows = document.querySelectorAll('#ord-items-wrap .order-item-row');
+  const items = [];
+  rows.forEach(row => {
+    const name = row.querySelector('.oi-name').value.trim();
+    const size = row.querySelector('.oi-size').value;
+    const price = parseFloat(row.querySelector('.oi-price').value) || 0;
+    if (name) items.push({ name, size, price });
+  });
+  return items;
+}
+
+window.calcOrderTotal = function() {
+  const items = getOrderItems();
+  const subtotal = items.reduce((sum, i) => sum + i.price, 0);
+  const shipping = parseFloat(document.getElementById('ord-shipping').value) || 0;
+  const total = subtotal + shipping;
+  document.getElementById('ord-subtotal').value = subtotal;
+  document.getElementById('ord-total-display').textContent = fmt(total);
+};
+
+window.loadOrderForEdit = function(orderId) {
+  const order = DB.orders.find(o => o.id === orderId);
+  if (!order) return;
+  
+  document.getElementById('order-modal-title').textContent = 'edit order';
+  document.getElementById('ord-edit-id').value = order.id;
+  document.getElementById('ord-code').value = order.code || '';
+  document.getElementById('ord-date').value = order.date;
+  document.getElementById('ord-client').value = order.client || '';
+  document.getElementById('ord-phone').value = order.phone || '';
+  document.getElementById('ord-email').value = order.email || '';
+  document.getElementById('ord-address').value = order.address || '';
+  document.getElementById('ord-shipping').value = order.shipping || 0;
+  document.getElementById('ord-confirm').value = order.confirm || 'pending';
+  document.getElementById('ord-status').value = order.status || 'pending';
+  document.getElementById('ord-note').value = order.note || '';
+  
+  document.getElementById('ord-items-wrap').innerHTML = '';
+  if (order.items && order.items.length) {
+    order.items.forEach(item => {
+      addOrderItemRow(item.name, item.size, item.price);
+    });
+  } else {
+    addOrderItemRow();
+  }
+  calcOrderTotal();
+  openModal('modal-order');
+};
+
+window.saveOrder = function() {
+  const editId = document.getElementById('ord-edit-id').value;
+  const date = document.getElementById('ord-date').value;
+  const client = document.getElementById('ord-client').value.trim();
+  const code = document.getElementById('ord-code').value.trim() || '#ORD-' + Date.now().toString().slice(-6);
+  if (!date || !client) return toast('date and client name required');
+  
+  const items = getOrderItems();
+  if (items.length === 0) return toast('add at least one item');
+  
+  const subtotal = parseFloat(document.getElementById('ord-subtotal').value) || 0;
+  const shipping = parseFloat(document.getElementById('ord-shipping').value) || 0;
+  const total = subtotal + shipping;
+  
+  const orderData = {
+    date,
+    code,
+    client,
+    phone: document.getElementById('ord-phone').value.trim(),
+    email: document.getElementById('ord-email').value.trim(),
+    address: document.getElementById('ord-address').value.trim(),
+    items: items,
+    subtotal,
+    shipping,
+    total,
+    confirm: document.getElementById('ord-confirm').value,
+    status: document.getElementById('ord-status').value,
+    note: document.getElementById('ord-note').value.trim()
+  };
+
+  if (editId) {
+    const idx = DB.orders.findIndex(o => o.id === editId);
+    if (idx >= 0) {
+      DB.orders[idx] = { ...DB.orders[idx], ...orderData };
+    }
+  } else {
+    DB.orders.push({ id: uid(), ...orderData });
+  }
+  
+  DB.orders.sort((a,b) => b.date.localeCompare(a.date));
+  saveToLocalStorage();
+  syncToCloud();
+  closeModal('modal-order');
+  
+  document.getElementById('ord-edit-id').value = '';
+  document.getElementById('order-modal-title').textContent = 'add order';
+  document.getElementById('ord-items-wrap').innerHTML = '';
+  document.getElementById('ord-code').value = '';
+  document.getElementById('ord-client').value = '';
+  document.getElementById('ord-phone').value = '';
+  document.getElementById('ord-email').value = '';
+  document.getElementById('ord-address').value = '';
+  document.getElementById('ord-shipping').value = '0';
+  document.getElementById('ord-subtotal').value = '0';
+  document.getElementById('ord-total-display').textContent = 'EGP 0';
+  document.getElementById('ord-note').value = '';
+  addOrderItemRow();
+  
+  renderOrders();
+  toast(editId ? 'order updated ✓' : 'order saved ✓');
+};
+
+window.deleteOrder = function(id) {
+  if(!confirm('delete order?')) return;
+  DB.orders = DB.orders.filter(o => o.id !== id);
+  saveToLocalStorage();
+  syncToCloud();
+  renderOrders();
+  toast('deleted');
+};
+
+window.updateOrderConfirm = function(id, confirm) {
+  const o = DB.orders.find(o => o.id === id);
+  if(o) { o.confirm = confirm; saveToLocalStorage(); syncToCloud(); renderOrders(); }
+};
+
+window.updateOrderStatus = function(id, status) {
+  const o = DB.orders.find(o => o.id === id);
+  if(o) { o.status = status; saveToLocalStorage(); syncToCloud(); renderOrders(); }
+};
+
+function renderOrders() {
+  const total = DB.orders.length;
+  let confirmed = 0, pending = 0, rejected = 0, cancelled = 0, returned = 0;
+  
+  DB.orders.forEach(o => {
+    if (o.confirm === 'confirmed') confirmed++;
+    else if (o.confirm === 'pending') pending++;
+    else if (o.confirm === 'rejected') rejected++;
+    if (o.status === 'cancelled') cancelled++;
+    if (o.status === 'returned') returned++;
+  });
+  
+  setVal('ord-total', total);
+  setVal('ord-confirmed', confirmed);
+  setVal('ord-pending', pending);
+  setVal('ord-rejected', rejected);
+  setVal('ord-cancelled', cancelled);
+  setVal('ord-returned', returned);
+  
+  const pct = (n) => total > 0 ? Math.round((n/total)*100) + '%' : '0%';
+  setVal('ord-confirmed-pct', pct(confirmed));
+  setVal('ord-pending-pct', pct(pending));
+  setVal('ord-rejected-pct', pct(rejected));
+  setVal('ord-cancelled-pct', pct(cancelled));
+  setVal('ord-returned-pct', pct(returned));
+  
+  const tbody = document.getElementById('ord-body');
+  if(!tbody) return;
+  tbody.innerHTML = DB.orders.length ? DB.orders.map(o => {
+    const itemSummary = o.items.map(it => `${it.name} (${it.size})`).join(', ');
+    return `<tr>
+      <td class="td-muted">${o.code}</td>
+      <td class="td-muted">${fmtDate(o.date)}</td>
+      <td>${o.client}</td>
+      <td class="td-muted" style="font-size:11px">${o.phone||'—'}</td>
+      <td style="font-size:11px">${itemSummary}</td>
+      <td>${fmt(o.subtotal)}</td>
+      <td>${fmt(o.shipping)}</td>
+      <td style="color:var(--ads)">${fmt(o.total)}</td>
+      <td>
+        <select class="status-select" onchange="updateOrderConfirm('${o.id}', this.value)">
+          ${['pending','confirmed','rejected'].map(s => `<option value="${s}"${o.confirm===s?' selected':''}>${s}</option>`).join('')}
+        </select>
+      </td>
+      <td>
+        <select class="status-select" onchange="updateOrderStatus('${o.id}', this.value)">
+          ${['pending','processing','shipped','delivered','cancelled','returned'].map(s => `<option value="${s}"${o.status===s?' selected':''}>${s}</option>`).join('')}
+        </select>
+      </td>
+      <td class="td-muted" style="font-size:11px;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${o.note||'—'}</td>
+      <td>
+        <button class="btn-edit" onclick="loadOrderForEdit('${o.id}')">✎</button>
+        <span class="td-del" onclick="deleteOrder('${o.id}')" style="margin-left:4px">✕</span>
+      </td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="12" class="empty-state">no orders yet</td></tr>';
+}
+
+// ════════════════════════════════════ INFLUENCERS ════
+window.saveInfluencer = function() {
+  const date=document.getElementById('inf-date').value;
+  const name=document.getElementById('inf-name').value.trim();
+  if(!date||!name) return toast('date and name required');
+  DB.influencers.push({id:uid(),date,name,platform:document.getElementById('inf-platform').value,followers:document.getElementById('inf-followers').value.trim(),item:document.getElementById('inf-item').value.trim(),size:document.getElementById('inf-size').value,status:document.getElementById('inf-status').value,link:document.getElementById('inf-link').value.trim()});
+  DB.influencers.sort((a,b)=>b.date.localeCompare(a.date));
+  saveToLocalStorage();
+  syncToCloud();
+  closeModal('modal-influencer'); renderInfluencers(); renderDashboard(); toast('gifting logged ✓');
+};
+
+window.deleteInfluencer = function(id) {
+  if(!confirm('delete?')) return;
+  DB.influencers=DB.influencers.filter(i=>i.id!==id);
+  saveToLocalStorage();
+  syncToCloud();
+  renderInfluencers(); renderDashboard(); toast('deleted');
+};
+
+window.updateInfStatus = function(id,status) {
+  const i=DB.influencers.find(i=>i.id===id);
+  if(i){i.status=status; saveToLocalStorage(); syncToCloud(); renderInfluencers();}
+};
+
+function renderInfluencers() {
+  const posted=DB.influencers.filter(i=>i.status==='posted').length;
+  setVal('inf-total',DB.influencers.reduce((s)=>s+1,0)+' units');
+  setVal('inf-count',DB.influencers.length);
+  setVal('inf-posted',posted);
+  const tbody=document.getElementById('inf-body');
+  if(!tbody) return;
+  tbody.innerHTML=DB.influencers.length?DB.influencers.map(i=>`<tr>
+    <td class="td-muted">${fmtDate(i.date)}</td>
+    <td>${i.name}</td>
+    <td>${chip(i.platform,'chip-blue')}</td>
+    <td class="td-muted">${i.followers||'—'}</td>
+    <td>${i.item||'—'}</td>
+    <td>${i.size}</td>
+    <td>
+      <select class="status-select" onchange="updateInfStatus('${i.id}',this.value)">
+        ${['sent','posted','pending','ghosted'].map(s=>`<option value="${s}"${i.status===s?' selected':''}>${s}</option>`).join('')}
+      </select>
+    </td>
+    <td>${i.link?`<a href="${i.link}" target="_blank" style="color:var(--ads);font-family:var(--mono);font-size:10px">view ↗</a>`:'—'}</td>
+    <td class="td-del" onclick="deleteInfluencer('${i.id}')">✕</td>
+  </tr>`).join(''):'<tr><td colspan="9" class="empty-state">no gifting logged yet</td></tr>';
+}
+
+// ════════════════════════════════════ DROPS ════
+window.saveDrop = function() {
+  const name=document.getElementById('drop-name').value.trim();
+  if(!name) return toast('drop name required');
+  DB.drops.push({id:uid(),name,date:document.getElementById('drop-date').value,desc:document.getElementById('drop-desc').value.trim(),status:document.getElementById('drop-status').value,units:parseInt(document.getElementById('drop-units').value)||0});
+  DB.drops.sort((a,b)=>b.date.localeCompare(a.date));
+  saveToLocalStorage();
+  syncToCloud();
+  closeModal('modal-drop'); renderDrops(); renderDashboard(); toast('drop saved ✓');
+};
+
+window.deleteDrop = function(id) {
+  if(!confirm('delete this drop?')) return;
+  DB.drops=DB.drops.filter(d=>d.id!==id);
+  saveToLocalStorage();
+  syncToCloud();
+  renderDrops(); renderDashboard(); toast('deleted');
+};
+
+function renderDrops() {
+  const grid=document.getElementById('drops-grid');
+  if(!grid) return;
+  grid.innerHTML=DB.drops.length?DB.drops.map(d=>`
+    <div class="card">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px">
+        <div>
+          <div style="font-family:var(--mono);font-size:15px;font-weight:500;margin-bottom:6px">${d.name}</div>
+          ${chip(d.status, STATUS_COLORS[d.status]||'chip-blue')}
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="deleteDrop('${d.id}')">✕</button>
+      </div>
+      <hr class="divider">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-family:var(--mono);font-size:11px">
+        <div><div style="color:var(--muted);margin-bottom:3px">date</div>${d.date?fmtDate(d.date):'—'}</div>
+        <div><div style="color:var(--muted);margin-bottom:3px">units</div>${d.units||0}</div>
+      </div>
+      ${d.desc?`<div style="margin-top:12px;font-size:12px;color:var(--muted);line-height:1.5">${d.desc}</div>`:''}
+    </div>`).join(''):'<div class="card gcol2"><div class="empty-state">no drops yet — create your first</div></div>';
+}
+
+// ════════════════════════════════════ DASHBOARD ════
+function renderDashboard() {
+  const totalRev=totalRevenue();
+  const totalExp=totalExpenses();
+  const adsBudget=totalRev*.1;
+  const adsSpent=DB.expenses.filter(e=>e.cat==='ads').reduce((s,e)=>s+e.amount,0);
+  setVal('d-total-rev',fmt(totalRev));
+  setVal('d-rev-days',Object.keys(DB.revenue).length+' days tracked');
+  setVal('d-net',fmt(totalRev-totalExp));
+  setVal('d-total-exp',fmt(totalExp));
+  setVal('d-exp-count',DB.expenses.length+' entries');
+  setVal('d-ads-left',fmt(Math.max(0,adsBudget-adsSpent)));
+  setVal('alloc-ads',fmt(totalRev*.1));
+  setVal('alloc-res',fmt(totalRev*.1));
+  setVal('alloc-rst',fmt(totalRev*.8));
+  const invEl=document.getElementById('d-inv-overview');
+  if(invEl){
+    if(!DB.products.length){invEl.innerHTML='<span style="color:var(--muted)">no products yet</span>';}
+    else{
+      invEl.innerHTML=DB.products.slice(0,4).map(p=>{
+        const total=Object.values(p.sizes).reduce((s,v)=>s+v,0);
+        const pct=Math.min(100,total*5);
+        return `<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>${p.name}</span><span style="color:var(--muted)">${total} units</span></div><div class="prog-bar" style="margin-top:0"><div class="prog-fill" style="width:${pct}%;background:${total<=3?'var(--danger)':total<=10?'var(--warn)':'var(--restock)'}"></div></div></div>`;
+      }).join('')+(DB.products.length>4?`<div style="color:var(--muted);font-size:10px;margin-top:4px">+${DB.products.length-4} more</div>`:'');
+    }
+  }
+  const dropsEl=document.getElementById('d-drops-list');
+  if(dropsEl){
+    dropsEl.innerHTML=DB.drops.length?DB.drops.slice(0,3).map(d=>`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span>${d.name}</span>${chip(d.status,STATUS_COLORS[d.status]||'chip-blue')}</div>`).join(''):'<span style="color:var(--muted)">no drops yet</span>';
+  }
+  const recentEl=document.getElementById('d-recent-exp');
+  if(recentEl){
+    recentEl.innerHTML=DB.expenses.length?DB.expenses.slice(0,5).map(e=>`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div><span style="margin-right:8px">${chip(CAT_LABELS[e.cat]||e.cat,CAT_COLORS[e.cat]||'chip-blue')}</span><span style="font-size:11px">${e.desc||'—'}</span></div><span style="color:var(--danger)">${fmt(e.amount)}</span></div>`).join(''):'<span style="color:var(--muted)">no expenses yet</span>';
+  }
+  const infEl=document.getElementById('d-inf-overview');
+  if(infEl){
+    infEl.innerHTML=DB.influencers.length?DB.influencers.slice(0,4).map(i=>`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span>${i.name}</span>${chip(i.status,STATUS_COLORS[i.status]||'chip-blue')}</div>`).join(''):'<span style="color:var(--muted)">no gifting logged yet</span>';
+  }
+}
+
+// ════════════════════════════════════ INIT ════
+const STATUS_COLORS = { pending:'chip-amber', confirmed:'chip-green', shipped:'chip-blue', delivered:'chip-green', cancelled:'chip-red', returned:'chip-pink', upcoming:'chip-blue', live:'chip-green', 'sold out':'chip-red', archived:'chip-purple' };
+
+function init() {
+  loadFromLocalStorage();
+  setupAuth();
+  
+  const now = new Date();
+  const sbDate = document.getElementById('sb-date');
+  if(sbDate) sbDate.innerHTML = now.toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short',year:'numeric'}).toUpperCase()+'<br>'+now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  setTimeout(() => {
+    addOrderItemRow();
+  }, 100);
+  renderDashboard();
+}
+
+init();
+</script>
+</body>
+</html>
