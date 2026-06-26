@@ -397,6 +397,9 @@ input[type=number]{-moz-appearance:textfield}
     <div class="nav-item" data-page="inventory"><span class="icon">▦</span> Inventory</div>
     <div class="nav-item" data-page="orders"><span class="icon">◎</span> Orders</div>
     <div class="nav-item" data-page="influencers"><span class="icon">✦</span> Influencers</div>
+    <div class="sb-section">filters</div>
+    <div class="nav-item" data-page="mekki"><span class="icon">🔴</span> Mekki</div>
+    <div class="nav-item" data-page="sakr"><span class="icon">🔵</span> Sakr</div>
     <div class="sb-section">drops</div>
     <div class="nav-item" data-page="drops"><span class="icon">◉</span> Drops</div>
   </div>
@@ -759,7 +762,7 @@ input[type=number]{-moz-appearance:textfield}
       <div class="scroll-x">
         <table>
           <thead><tr><th>Campaign</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th><th>Total</th><th>Avg</th></tr></thead>
-          <tbody id="weekly-report-body"></tbody>
+          <tbody id="ads-weekly-body"></tbody>
         </table>
       </div>
     </div>
@@ -769,7 +772,7 @@ input[type=number]{-moz-appearance:textfield}
       <div class="scroll-x">
         <table>
           <thead><tr><th>Campaign</th><th>Spend</th><th>Impressions</th><th>Clicks</th><th>CPC</th><th>Conversions</th><th>CPA</th><th>ROAS</th><th>Status</th></tr></thead>
-          <tbody id="monthly-report-body"></tbody>
+          <tbody id="ads-monthly-body"></tbody>
         </table>
       </div>
     </div>
@@ -834,6 +837,48 @@ input[type=number]{-moz-appearance:textfield}
         <table>
           <thead><tr><th>#</th><th>date</th><th>client</th><th>phone</th><th>items</th><th>subtotal</th><th>shipping</th><th>total</th><th>confirm</th><th>fulfillment</th><th>note</th><th>actions</th></tr></thead>
           <tbody id="ord-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MEKKI - Pending Confirmation Orders -->
+<div class="page" id="page-mekki">
+  <div class="pg-header">
+    <div><h1>🔴 mekki</h1><p>orders with pending confirmation status</p></div>
+    <div style="display:flex;gap:8px">
+      <span style="font-family:var(--mono);font-size:11px;color:var(--muted);padding:8px 0">Total: <span id="mekki-count">0</span></span>
+    </div>
+  </div>
+  <div class="pg-body">
+    <div class="tbl-wrap">
+      <div class="tbl-head"><h3>pending confirmation orders</h3></div>
+      <div class="scroll-x">
+        <table>
+          <thead><tr><th>#</th><th>date</th><th>client</th><th>phone</th><th>items</th><th>subtotal</th><th>shipping</th><th>total</th><th>confirm</th><th>fulfillment</th><th>note</th><th>actions</th></tr></thead>
+          <tbody id="mekki-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SAKR - Confirmed Confirmation + Pending Fulfillment -->
+<div class="page" id="page-sakr">
+  <div class="pg-header">
+    <div><h1>🔵 sakr</h1><p>orders with confirmed status but pending fulfillment</p></div>
+    <div style="display:flex;gap:8px">
+      <span style="font-family:var(--mono);font-size:11px;color:var(--muted);padding:8px 0">Total: <span id="sakr-count">0</span></span>
+    </div>
+  </div>
+  <div class="pg-body">
+    <div class="tbl-wrap">
+      <div class="tbl-head"><h3>confirmed pending fulfillment orders</h3></div>
+      <div class="scroll-x">
+        <table>
+          <thead><tr><th>#</th><th>date</th><th>client</th><th>phone</th><th>items</th><th>subtotal</th><th>shipping</th><th>total</th><th>confirm</th><th>fulfillment</th><th>note</th><th>actions</th></tr></thead>
+          <tbody id="sakr-body"></tbody>
         </table>
       </div>
     </div>
@@ -1285,6 +1330,8 @@ function refreshAll() {
   else if (page === 'ads') renderAdsTracker();
   else if (page === 'inventory') renderInventory();
   else if (page === 'orders') renderOrders();
+  else if (page === 'mekki') renderMekki();
+  else if (page === 'sakr') renderSakr();
   else if (page === 'influencers') renderInfluencers();
   else if (page === 'drops') renderDrops();
 }
@@ -1381,6 +1428,8 @@ function renderPage(name) {
   else if (name === 'ads') renderAdsTracker();
   else if (name === 'inventory') renderInventory();
   else if (name === 'orders') renderOrders();
+  else if (name === 'mekki') renderMekki();
+  else if (name === 'sakr') renderSakr();
   else if (name === 'influencers') renderInfluencers();
   else if (name === 'drops') renderDrops();
 }
@@ -1862,9 +1911,11 @@ function renderAdsWeekly() {
   });
   const campaigns = [...new Set(logs.map(l => l.campaign))];
   const days = [];
-  for (let d = new Date(monday); d <= sunday; d.setDate(d.getDate() + 1)) days.push(toKey(d));
+  for (let d = new Date(monday); d <= sunday; d.setDate(d.getDate() + 1)) {
+    days.push(toKey(d));
+  }
   
-  const tbody = document.getElementById('weekly-report-body');
+  const tbody = document.getElementById('ads-weekly-body');
   if (!tbody) return;
   if (campaigns.length === 0) {
     tbody.innerHTML = '<tr><td colspan="10" class="empty-state">no data for this week</td></tr>';
@@ -1895,7 +1946,7 @@ function renderAdsMonthly() {
     return d >= monthStart && d <= monthEnd;
   });
   const campaigns = [...new Set(logs.map(l => l.campaign))];
-  const tbody = document.getElementById('monthly-report-body');
+  const tbody = document.getElementById('ads-monthly-body');
   if (!tbody) return;
   if (campaigns.length === 0) {
     tbody.innerHTML = '<tr><td colspan="9" class="empty-state">no data for this month</td></tr>';
@@ -2434,17 +2485,19 @@ window.deleteOrder = function(id) {
   saveToLocalStorage();
   syncToCloud();
   renderOrders();
+  renderMekki();
+  renderSakr();
   toast('deleted');
 };
 
 window.updateOrderConfirm = function(id, confirm) {
   const o = DB.orders.find(o => o.id === id);
-  if(o) { o.confirm = confirm; saveToLocalStorage(); syncToCloud(); renderOrders(); }
+  if(o) { o.confirm = confirm; saveToLocalStorage(); syncToCloud(); renderOrders(); renderMekki(); renderSakr(); }
 };
 
 window.updateOrderStatus = function(id, status) {
   const o = DB.orders.find(o => o.id === id);
-  if(o) { o.status = status; saveToLocalStorage(); syncToCloud(); renderOrders(); }
+  if(o) { o.status = status; saveToLocalStorage(); syncToCloud(); renderOrders(); renderMekki(); renderSakr(); }
 };
 
 function renderOrders() {
@@ -2517,6 +2570,68 @@ function renderOrders() {
       </td>
     </tr>`;
   }).join('') : `<tr><td colspan="12" class="empty-state">${searchTerm ? 'No orders match your search' : 'no orders yet'}</td></tr>`;
+}
+
+// ════════════════════════════════════ MEKKI - Pending Confirmation ════
+function renderMekki() {
+  const pendingOrders = DB.orders.filter(o => o.confirm === 'pending');
+  const sorted = sortOrders(pendingOrders);
+  
+  document.getElementById('mekki-count').textContent = sorted.length;
+  
+  const tbody = document.getElementById('mekki-body');
+  if(!tbody) return;
+  tbody.innerHTML = sorted.length ? sorted.map(o => {
+    const itemSummary = o.items.map(it => `${it.name} (${it.size})`).join(', ');
+    return `<tr>
+      <td class="td-muted">${o.code}</td>
+      <td class="td-muted">${fmtDate(o.date)}</td>
+      <td>${o.client}</td>
+      <td class="td-muted" style="font-size:11px">${o.phone||'—'}</td>
+      <td style="font-size:11px">${itemSummary}</td>
+      <td>${fmt(o.subtotal)}</td>
+      <td>${fmt(o.shipping)}</td>
+      <td style="color:var(--ads)">${fmt(o.total)}</td>
+      <td>${getConfirmBadge(o.confirm)}</td>
+      <td>${getFulfillBadge(o.status)}</td>
+      <td class="td-muted" style="font-size:11px;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${o.note||'—'}</td>
+      <td>
+        <button class="btn-edit" onclick="loadOrderForEdit('${o.id}')">✎</button>
+        <span class="td-del" onclick="deleteOrder('${o.id}')" style="margin-left:4px">✕</span>
+      </td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="12" class="empty-state">no pending confirmation orders</td></tr>';
+}
+
+// ════════════════════════════════════ SAKR - Confirmed + Pending Fulfillment ════
+function renderSakr() {
+  const sakrOrders = DB.orders.filter(o => o.confirm === 'confirmed' && (o.status === 'pending' || o.status === 'processing'));
+  const sorted = sortOrders(sakrOrders);
+  
+  document.getElementById('sakr-count').textContent = sorted.length;
+  
+  const tbody = document.getElementById('sakr-body');
+  if(!tbody) return;
+  tbody.innerHTML = sorted.length ? sorted.map(o => {
+    const itemSummary = o.items.map(it => `${it.name} (${it.size})`).join(', ');
+    return `<tr>
+      <td class="td-muted">${o.code}</td>
+      <td class="td-muted">${fmtDate(o.date)}</td>
+      <td>${o.client}</td>
+      <td class="td-muted" style="font-size:11px">${o.phone||'—'}</td>
+      <td style="font-size:11px">${itemSummary}</td>
+      <td>${fmt(o.subtotal)}</td>
+      <td>${fmt(o.shipping)}</td>
+      <td style="color:var(--ads)">${fmt(o.total)}</td>
+      <td>${getConfirmBadge(o.confirm)}</td>
+      <td>${getFulfillBadge(o.status)}</td>
+      <td class="td-muted" style="font-size:11px;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${o.note||'—'}</td>
+      <td>
+        <button class="btn-edit" onclick="loadOrderForEdit('${o.id}')">✎</button>
+        <span class="td-del" onclick="deleteOrder('${o.id}')" style="margin-left:4px">✕</span>
+      </td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="12" class="empty-state">no orders matching Sakr filter</td></tr>';
 }
 
 // ════════════════════════════════════ IMPORT ORDERS ════
