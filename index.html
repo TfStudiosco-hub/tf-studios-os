@@ -68,6 +68,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .chip-red{color:var(--danger);background:rgba(239,68,68,.08)}
 .chip-pink{color:var(--pink);background:rgba(244,114,182,.08)}
 .chip-gray{color:var(--muted);background:rgba(92,92,120,.12)}
+.chip-cyan{color:#06b6d4;background:rgba(6,182,212,.08)}
+.chip-teal{color:#14b8a6;background:rgba(20,184,166,.08)}
+.chip-indigo{color:#6366f1;background:rgba(99,102,241,.08)}
 
 .status-badge{display:inline-block;padding:3px 10px;border-radius:2px;font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.08em;text-transform:capitalize}
 .status-confirm-pending{color:var(--warn);background:rgba(245,158,11,.15)}
@@ -92,6 +95,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .field-row{display:grid;gap:12px}
 .field-row.c2{grid-template-columns:1fr 1fr}
 .field-row.c3{grid-template-columns:1fr 1fr 1fr}
+.field-row.c4{grid-template-columns:1fr 1fr 1fr 1fr}
 .prefix-wrap{position:relative}
 .prefix-wrap .pfx{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:12px;color:var(--muted);pointer-events:none}
 .prefix-wrap input{padding-left:28px}
@@ -123,6 +127,8 @@ tr:hover td{background:var(--s2)}
 .td-muted{color:var(--muted)}
 .td-del{cursor:pointer;color:var(--muted);transition:color .15s;text-align:right}
 .td-del:hover{color:var(--danger)}
+.td-up{color:var(--restock)}
+.td-down{color:var(--danger)}
 .empty-state{text-align:center;padding:40px 20px;color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.08em}
 
 .prog-bar{height:3px;background:var(--b1);border-radius:2px;overflow:hidden;margin-top:10px}
@@ -130,7 +136,7 @@ tr:hover td{background:var(--s2)}
 
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center}
 .modal-bg.open{display:flex}
-.modal{background:var(--s1);border:1px solid var(--b2);border-radius:4px;width:640px;max-width:95vw;max-height:90vh;overflow-y:auto}
+.modal{background:var(--s1);border:1px solid var(--b2);border-radius:4px;width:720px;max-width:95vw;max-height:90vh;overflow-y:auto}
 .modal-header{padding:20px 24px 16px;border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between}
 .modal-header h2{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.12em;text-transform:uppercase}
 .modal-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:0 4px}
@@ -278,6 +284,58 @@ input[type=number]{-moz-appearance:textfield}
 .search-bar .clear-btn:hover {
   color: var(--text);
 }
+
+/* Ads Tracker Specific */
+.ads-stats-grid .kpi-val { font-size: 24px; }
+.ads-stats-grid .kpi-sub { font-size: 9px; }
+
+.week-selector {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.week-selector button {
+  background: var(--s2);
+  border: 1px solid var(--b1);
+  color: var(--text);
+  padding: 6px 14px;
+  border-radius: 2px;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 10px;
+}
+.week-selector button:hover {
+  border-color: var(--b2);
+}
+.week-selector .week-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  min-width: 200px;
+  text-align: center;
+}
+
+.compare-badge {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 2px 10px;
+  border-radius: 2px;
+  margin-left: 8px;
+}
+.compare-badge.up {
+  color: var(--restock);
+  background: rgba(34,197,94,.12);
+}
+.compare-badge.down {
+  color: var(--danger);
+  background: rgba(239,68,68,.12);
+}
+.compare-badge.flat {
+  color: var(--muted);
+  background: rgba(92,92,120,.12);
+}
 </style>
 </head>
 <body>
@@ -318,6 +376,8 @@ input[type=number]{-moz-appearance:textfield}
     <div class="nav-item" data-page="bank"><span class="icon">◆</span> TF Bank</div>
     <div class="nav-item" data-page="revenue"><span class="icon">↑</span> Revenue</div>
     <div class="nav-item" data-page="expenses"><span class="icon">↓</span> Expenses</div>
+    <div class="sb-section">marketing</div>
+    <div class="nav-item" data-page="ads"><span class="icon">📊</span> Ads Tracker</div>
     <div class="sb-section">operations</div>
     <div class="nav-item" data-page="inventory"><span class="icon">▦</span> Inventory</div>
     <div class="nav-item" data-page="orders"><span class="icon">◎</span> Orders</div>
@@ -546,6 +606,83 @@ input[type=number]{-moz-appearance:textfield}
   </div>
 </div>
 
+<!-- ADS TRACKER -->
+<div class="page" id="page-ads">
+  <div class="pg-header">
+    <div><h1>ads tracker</h1><p>meta campaigns — daily logs, weekly & monthly reports</p></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost btn-sm" onclick="exportAdsReport()">📊 Export Report</button>
+      <button class="btn btn-primary" onclick="openModal('modal-ad-log')">+ log daily data</button>
+    </div>
+  </div>
+  <div class="pg-body">
+    <!-- Campaigns Overview -->
+    <div class="grid4 gap ads-stats-grid" id="ads-overview">
+      <div class="card card-sm">
+        <h3>total spend</h3>
+        <div class="kpi-val" id="ads-total-spend">EGP 0</div>
+        <div class="kpi-sub" id="ads-total-campaigns">0 campaigns</div>
+      </div>
+      <div class="card card-sm">
+        <h3>total impressions</h3>
+        <div class="kpi-val" id="ads-total-impressions">0</div>
+        <div class="kpi-sub" id="ads-total-clicks">0 clicks</div>
+      </div>
+      <div class="card card-sm">
+        <h3>avg CPC</h3>
+        <div class="kpi-val" id="ads-avg-cpc">EGP 0</div>
+        <div class="kpi-sub">cost per click</div>
+      </div>
+      <div class="card card-sm">
+        <h3>avg ROAS</h3>
+        <div class="kpi-val" id="ads-avg-roas">0x</div>
+        <div class="kpi-sub">return on ad spend</div>
+      </div>
+    </div>
+
+    <!-- Weekly Report -->
+    <div class="card gap">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <h3 style="font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)">weekly report</h3>
+        <div class="week-selector">
+          <button onclick="changeWeek(-1)">‹</button>
+          <span class="week-label" id="week-label">Week of —</span>
+          <button onclick="changeWeek(1)">›</button>
+          <button onclick="resetWeek()" class="btn btn-ghost btn-sm" style="font-size:8px;padding:4px 10px">today</button>
+        </div>
+      </div>
+      <div class="scroll-x">
+        <table>
+          <thead><tr><th>Campaign</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th><th>Total</th><th>Avg</th></tr></thead>
+          <tbody id="weekly-report-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Monthly Summary -->
+    <div class="card gap">
+      <h3 style="font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:14px">monthly summary</h3>
+      <div class="scroll-x">
+        <table>
+          <thead><tr><th>Campaign</th><th>Spend</th><th>Impressions</th><th>Clicks</th><th>CPC</th><th>Conversions</th><th>CPA</th><th>ROAS</th><th>Status</th></tr></thead>
+          <tbody id="monthly-report-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- All Logs -->
+    <div class="tbl-wrap">
+      <div class="tbl-head"><h3>all logs</h3><span id="ads-log-count" style="font-family:var(--mono);font-size:10px;color:var(--muted)"></span></div>
+      <div class="scroll-x">
+        <table>
+          <thead><tr><th>date</th><th>campaign</th><th>spend</th><th>impressions</th><th>clicks</th><th>CTR</th><th>CPC</th><th>conversions</th><th>CPA</th><th>revenue</th><th>ROAS</th><th>actions</th></tr></thead>
+          <tbody id="ads-logs-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- INVENTORY -->
 <div class="page" id="page-inventory">
   <div class="pg-header">
@@ -676,6 +813,38 @@ input[type=number]{-moz-appearance:textfield}
       <div class="field"><label>description</label><input type="text" id="exp-desc" placeholder="e.g. drop 02 ad campaign, hoodie restock..."></div>
       <div class="field"><label>amount (EGP)</label><div class="prefix-wrap"><span class="pfx">E£</span><input type="number" id="exp-amount" placeholder="0" min="0"></div></div>
       <div class="btn-row"><button class="btn btn-primary" onclick="saveExpense()">save expense</button><button class="btn btn-ghost" onclick="closeModal('modal-expense')">cancel</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- AD Log Modal -->
+<div class="modal-bg" id="modal-ad-log">
+  <div class="modal">
+    <div class="modal-header"><h2>log ad campaign data</h2><button class="modal-close" onclick="closeModal('modal-ad-log')">×</button></div>
+    <div class="modal-body">
+      <div class="field-row c2">
+        <div class="field"><label>date</label><input type="date" id="ad-date"></div>
+        <div class="field"><label>campaign name</label>
+          <select id="ad-campaign">
+            <option value="New Campaign">+ Create New</option>
+          </select>
+        </div>
+      </div>
+      <div id="new-campaign-field" style="display:none" class="field">
+        <label>new campaign name</label>
+        <input type="text" id="ad-new-campaign" placeholder="e.g. Drop 02 - Awareness">
+      </div>
+      <div class="field-row c3">
+        <div class="field"><label>spend (EGP)</label><div class="prefix-wrap"><span class="pfx">E£</span><input type="number" id="ad-spend" placeholder="0" min="0"></div></div>
+        <div class="field"><label>impressions</label><input type="number" id="ad-impressions" placeholder="0" min="0"></div>
+        <div class="field"><label>clicks</label><input type="number" id="ad-clicks" placeholder="0" min="0"></div>
+      </div>
+      <div class="field-row c3">
+        <div class="field"><label>conversions</label><input type="number" id="ad-conversions" placeholder="0" min="0"></div>
+        <div class="field"><label>revenue (EGP)</label><div class="prefix-wrap"><span class="pfx">E£</span><input type="number" id="ad-revenue" placeholder="0" min="0"></div></div>
+        <div class="field"><label>notes</label><input type="text" id="ad-notes" placeholder="optional notes"></div>
+      </div>
+      <div class="btn-row"><button class="btn btn-primary" onclick="saveAdLog()">save log</button><button class="btn btn-ghost" onclick="closeModal('modal-ad-log')">cancel</button></div>
     </div>
   </div>
 </div>
@@ -873,11 +1042,15 @@ const DB = {
   orders: [],
   influencers: [],
   drops: [],
+  adsLogs: [],
+  adsCampaigns: []
 };
 
 let currentUser = null;
 let unsubscribe = null;
 let searchTerm = '';
+let currentWeekOffset = 0;
+let calYear, calMonth, calSelected;
 
 // ════════════════════════════════════ DOM REFS ════
 const loginScreen = document.getElementById('login-screen');
@@ -945,7 +1118,7 @@ async function loadData() {
     if (docSnap.exists()) {
       const data = docSnap.data();
       Object.assign(DB, data);
-      ['expenses', 'products', 'orders', 'influencers', 'drops'].forEach(key => {
+      ['expenses', 'products', 'orders', 'influencers', 'drops', 'adsLogs', 'adsCampaigns'].forEach(key => {
         if (!Array.isArray(DB[key])) DB[key] = [];
       });
       if (typeof DB.revenue !== 'object') DB.revenue = {};
@@ -988,7 +1161,7 @@ function loadFromLocalStorage() {
   try {
     const s = localStorage.getItem('tf_os_v2');
     if (s) Object.assign(DB, JSON.parse(s));
-    ['expenses', 'products', 'orders', 'influencers', 'drops'].forEach(key => {
+    ['expenses', 'products', 'orders', 'influencers', 'drops', 'adsLogs', 'adsCampaigns'].forEach(key => {
       if (!Array.isArray(DB[key])) DB[key] = [];
     });
     if (typeof DB.revenue !== 'object') DB.revenue = {};
@@ -1007,6 +1180,7 @@ function refreshAll() {
   else if (page === 'bank') renderBank();
   else if (page === 'revenue') { renderRevenue(); renderCal(); }
   else if (page === 'expenses') renderExpenses();
+  else if (page === 'ads') renderAdsTracker();
   else if (page === 'inventory') renderInventory();
   else if (page === 'orders') renderOrders();
   else if (page === 'influencers') renderInfluencers();
@@ -1022,6 +1196,32 @@ function keyToDate(k) { const [y,m,d]=k.split('-').map(Number); return new Date(
 function fmtDate(k) { return keyToDate(k).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
 function todayKey() { return toKey(new Date()); }
 function setVal(id,v) { const el=document.getElementById(id); if(el) el.textContent=v; }
+
+// Get week number (Monday-Sunday)
+function getWeekNumber(date) {
+  const d = new Date(date);
+  d.setHours(0,0,0,0);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  const monday = new Date(d.setDate(diff));
+  monday.setHours(0,0,0,0);
+  return monday;
+}
+
+function getWeekRange(offset) {
+  const today = new Date();
+  const monday = getWeekNumber(today);
+  monday.setDate(monday.getDate() + (offset * 7));
+  const sunday = new Date(monday);
+  sunday.setDate(sunday.getDate() + 6);
+  return { monday, sunday };
+}
+
+function formatWeekLabel(monday, sunday) {
+  const m = monday.toLocaleDateString('en-GB', {day:'2-digit', month:'short'});
+  const s = sunday.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
+  return `${m} – ${s}`;
+}
 
 const CAT_COLORS = { ads:'chip-blue', stock:'chip-amber', packaging:'chip-pink', shipping:'chip-purple', design:'chip-green', other:'chip-blue' };
 const CAT_LABELS = { ads:'meta ads', stock:'stock', packaging:'packaging', shipping:'shipping', design:'design', other:'other' };
@@ -1073,6 +1273,7 @@ function renderPage(name) {
   else if (name === 'bank') renderBank();
   else if (name === 'revenue') { renderRevenue(); renderCal(); }
   else if (name === 'expenses') renderExpenses();
+  else if (name === 'ads') renderAdsTracker();
   else if (name === 'inventory') renderInventory();
   else if (name === 'orders') renderOrders();
   else if (name === 'influencers') renderInfluencers();
@@ -1090,15 +1291,287 @@ window.openModal = function(id) {
   const m = document.getElementById(id);
   m.querySelectorAll('input[type=date]').forEach(el => { if(!el.value) el.value = today; });
   m.classList.add('open');
+  if (id === 'modal-ad-log') {
+    updateCampaignDropdown();
+  }
 }
 window.closeModal = function(id) { document.getElementById(id).classList.remove('open'); }
 document.querySelectorAll('.modal-bg').forEach(m => {
   m.addEventListener('click', e => { if(e.target === m) m.classList.remove('open'); });
 });
 
-// ════════════════════════════════════ REVENUE ════
-let calYear, calMonth, calSelected;
+// Ad modal campaign dropdown
+document.getElementById('ad-campaign').addEventListener('change', function() {
+  const newCampaignField = document.getElementById('new-campaign-field');
+  if (this.value === 'New Campaign') {
+    newCampaignField.style.display = 'block';
+  } else {
+    newCampaignField.style.display = 'none';
+  }
+});
 
+function updateCampaignDropdown() {
+  const select = document.getElementById('ad-campaign');
+  const currentValue = select.value;
+  select.innerHTML = '<option value="New Campaign">+ Create New</option>';
+  const campaigns = [...new Set(DB.adsLogs.map(l => l.campaign))].filter(Boolean);
+  campaigns.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c;
+    opt.textContent = c;
+    select.appendChild(opt);
+  });
+  if (currentValue && campaigns.includes(currentValue)) {
+    select.value = currentValue;
+  }
+}
+
+// ════════════════════════════════════ ADS TRACKER ════
+window.saveAdLog = function() {
+  const date = document.getElementById('ad-date').value;
+  let campaign = document.getElementById('ad-campaign').value;
+  const newCampaign = document.getElementById('ad-new-campaign').value.trim();
+  const spend = parseFloat(document.getElementById('ad-spend').value) || 0;
+  const impressions = parseInt(document.getElementById('ad-impressions').value) || 0;
+  const clicks = parseInt(document.getElementById('ad-clicks').value) || 0;
+  const conversions = parseInt(document.getElementById('ad-conversions').value) || 0;
+  const revenue = parseFloat(document.getElementById('ad-revenue').value) || 0;
+  const notes = document.getElementById('ad-notes').value.trim();
+  
+  if (!date || !campaign) return toast('Date and campaign required');
+  if (campaign === 'New Campaign' && newCampaign) {
+    campaign = newCampaign;
+  }
+  if (campaign === 'New Campaign' || !campaign) return toast('Please select or create a campaign');
+  if (spend <= 0 && impressions <= 0 && clicks <= 0) return toast('Enter at least spend, impressions, or clicks');
+  
+  const cpc = clicks > 0 ? spend / clicks : 0;
+  const ctr = impressions > 0 ? (clicks / impressions) * 100 : 0;
+  const cpa = conversions > 0 ? spend / conversions : 0;
+  const roas = spend > 0 ? revenue / spend : 0;
+  
+  DB.adsLogs.push({
+    id: uid(),
+    date: date,
+    campaign: campaign,
+    spend: spend,
+    impressions: impressions,
+    clicks: clicks,
+    conversions: conversions,
+    revenue: revenue,
+    cpc: cpc,
+    ctr: ctr,
+    cpa: cpa,
+    roas: roas,
+    notes: notes
+  });
+  
+  if (!DB.adsCampaigns.includes(campaign)) {
+    DB.adsCampaigns.push(campaign);
+  }
+  
+  DB.adsLogs.sort((a,b) => b.date.localeCompare(a.date));
+  
+  saveToLocalStorage();
+  syncToCloud();
+  closeModal('modal-ad-log');
+  
+  document.getElementById('ad-spend').value = '';
+  document.getElementById('ad-impressions').value = '';
+  document.getElementById('ad-clicks').value = '';
+  document.getElementById('ad-conversions').value = '';
+  document.getElementById('ad-revenue').value = '';
+  document.getElementById('ad-notes').value = '';
+  document.getElementById('ad-new-campaign').value = '';
+  document.getElementById('new-campaign-field').style.display = 'none';
+  
+  renderAdsTracker();
+  toast('✅ Ad data saved');
+};
+
+window.deleteAdLog = function(id) {
+  if (!confirm('Delete this log?')) return;
+  DB.adsLogs = DB.adsLogs.filter(l => l.id !== id);
+  saveToLocalStorage();
+  syncToCloud();
+  renderAdsTracker();
+  toast('Deleted');
+};
+
+function renderAdsTracker() {
+  const logs = DB.adsLogs;
+  
+  const totalSpend = logs.reduce((s, l) => s + l.spend, 0);
+  const totalImpressions = logs.reduce((s, l) => s + l.impressions, 0);
+  const totalClicks = logs.reduce((s, l) => s + l.clicks, 0);
+  const totalRevenue = logs.reduce((s, l) => s + l.revenue, 0);
+  const campaigns = [...new Set(logs.map(l => l.campaign))];
+  
+  setVal('ads-total-spend', fmt(totalSpend));
+  setVal('ads-total-impressions', fmtN(totalImpressions));
+  setVal('ads-total-campaigns', campaigns.length + ' campaigns');
+  setVal('ads-total-clicks', fmtN(totalClicks) + ' clicks');
+  
+  const avgCpc = totalClicks > 0 ? totalSpend / totalClicks : 0;
+  const avgRoas = totalSpend > 0 ? totalRevenue / totalSpend : 0;
+  setVal('ads-avg-cpc', fmt(avgCpc));
+  setVal('ads-avg-roas', avgRoas.toFixed(2) + 'x');
+  
+  const tbody = document.getElementById('ads-logs-body');
+  if (tbody) {
+    tbody.innerHTML = logs.length ? logs.map(l => {
+      const ctr = l.impressions > 0 ? ((l.clicks / l.impressions) * 100).toFixed(2) : '0.00';
+      const cpc = l.clicks > 0 ? fmt(l.spend / l.clicks) : fmt(0);
+      const cpa = l.conversions > 0 ? fmt(l.spend / l.conversions) : fmt(0);
+      const roas = l.spend > 0 ? (l.revenue / l.spend).toFixed(2) + 'x' : '0x';
+      return `<tr>
+        <td class="td-muted">${fmtDate(l.date)}</td>
+        <td><span class="chip chip-cyan">${l.campaign}</span></td>
+        <td>${fmt(l.spend)}</td>
+        <td>${fmtN(l.impressions)}</td>
+        <td>${fmtN(l.clicks)}</td>
+        <td>${ctr}%</td>
+        <td>${cpc}</td>
+        <td>${fmtN(l.conversions)}</td>
+        <td>${cpa}</td>
+        <td>${fmt(l.revenue)}</td>
+        <td style="color:${l.roas >= 1 ? 'var(--restock)' : 'var(--danger)'}">${roas}</td>
+        <td class="td-del" onclick="deleteAdLog('${l.id}')">✕</td>
+      </tr>`;
+    }).join('') : '<tr><td colspan="12" class="empty-state">no ad data logged yet</td></tr>';
+  }
+  
+  setVal('ads-log-count', logs.length + ' entries');
+  renderWeeklyReport();
+  renderMonthlyReport();
+}
+
+function renderWeeklyReport() {
+  const { monday, sunday } = getWeekRange(currentWeekOffset);
+  const weekLabel = document.getElementById('week-label');
+  if (weekLabel) weekLabel.textContent = formatWeekLabel(monday, sunday);
+  
+  const logs = DB.adsLogs.filter(l => {
+    const d = keyToDate(l.date);
+    return d >= monday && d <= sunday;
+  });
+  
+  const campaigns = [...new Set(logs.map(l => l.campaign))];
+  const days = [];
+  for (let d = new Date(monday); d <= sunday; d.setDate(d.getDate() + 1)) {
+    days.push(toKey(d));
+  }
+  
+  const tbody = document.getElementById('weekly-report-body');
+  if (!tbody) return;
+  
+  if (campaigns.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="10" class="empty-state">no data for this week</td></tr>';
+    return;
+  }
+  
+  tbody.innerHTML = campaigns.map(campaign => {
+    const dayData = days.map(day => {
+      const entry = logs.find(l => l.date === day && l.campaign === campaign);
+      return entry ? entry.spend : 0;
+    });
+    const total = dayData.reduce((s, v) => s + v, 0);
+    const avg = dayData.filter(v => v > 0).length > 0 ? total / dayData.filter(v => v > 0).length : 0;
+    
+    return `<tr>
+      <td><span class="chip chip-cyan">${campaign}</span></td>
+      ${dayData.map(d => `<td>${d > 0 ? fmt(d) : '—'}</td>`).join('')}
+      <td style="color:var(--ads)">${fmt(total)}</td>
+      <td class="td-muted">${fmt(avg)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderMonthlyReport() {
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  
+  const logs = DB.adsLogs.filter(l => {
+    const d = keyToDate(l.date);
+    return d >= monthStart && d <= monthEnd;
+  });
+  
+  const campaigns = [...new Set(logs.map(l => l.campaign))];
+  const tbody = document.getElementById('monthly-report-body');
+  if (!tbody) return;
+  
+  if (campaigns.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" class="empty-state">no data for this month</td></tr>';
+    return;
+  }
+  
+  tbody.innerHTML = campaigns.map(campaign => {
+    const entries = logs.filter(l => l.campaign === campaign);
+    const spend = entries.reduce((s, l) => s + l.spend, 0);
+    const impressions = entries.reduce((s, l) => s + l.impressions, 0);
+    const clicks = entries.reduce((s, l) => s + l.clicks, 0);
+    const conversions = entries.reduce((s, l) => s + l.conversions, 0);
+    const revenue = entries.reduce((s, l) => s + l.revenue, 0);
+    const cpc = clicks > 0 ? spend / clicks : 0;
+    const cpa = conversions > 0 ? spend / conversions : 0;
+    const roas = spend > 0 ? revenue / spend : 0;
+    
+    let status = '🟡 Active';
+    let statusColor = 'chip-amber';
+    if (roas >= 2) { status = '🟢 Profitable'; statusColor = 'chip-green'; }
+    else if (roas >= 1) { status = '🟡 Breaking Even'; statusColor = 'chip-amber'; }
+    else if (roas > 0) { status = '🔴 Losing'; statusColor = 'chip-red'; }
+    else { status = '⚪ No Revenue'; statusColor = 'chip-gray'; }
+    
+    return `<tr>
+      <td><span class="chip chip-cyan">${campaign}</span></td>
+      <td>${fmt(spend)}</td>
+      <td>${fmtN(impressions)}</td>
+      <td>${fmtN(clicks)}</td>
+      <td>${fmt(cpc)}</td>
+      <td>${fmtN(conversions)}</td>
+      <td>${fmt(cpa)}</td>
+      <td style="color:${roas >= 1 ? 'var(--restock)' : 'var(--danger)'}">${roas.toFixed(2)}x</td>
+      <td><span class="chip ${statusColor}">${status}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+window.changeWeek = function(delta) {
+  currentWeekOffset += delta;
+  renderWeeklyReport();
+};
+
+window.resetWeek = function() {
+  currentWeekOffset = 0;
+  renderWeeklyReport();
+};
+
+window.exportAdsReport = function() {
+  const logs = DB.adsLogs;
+  if (logs.length === 0) return toast('No data to export');
+  
+  let csv = 'Date,Campaign,Spend,Impressions,Clicks,CTR,CPC,Conversions,CPA,Revenue,ROAS,Notes\n';
+  logs.forEach(l => {
+    const ctr = l.impressions > 0 ? ((l.clicks / l.impressions) * 100).toFixed(2) : 0;
+    const cpc = l.clicks > 0 ? (l.spend / l.clicks).toFixed(2) : 0;
+    const cpa = l.conversions > 0 ? (l.spend / l.conversions).toFixed(2) : 0;
+    const roas = l.spend > 0 ? (l.revenue / l.spend).toFixed(2) : 0;
+    csv += `${l.date},${l.campaign},${l.spend},${l.impressions},${l.clicks},${ctr}%,${cpc},${l.conversions},${cpa},${l.revenue},${roas}x,${l.notes||''}\n`;
+  });
+  
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `ads_report_${todayKey()}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('📊 Report exported');
+};
+
+// ════════════════════════════════════ REVENUE ════
 function totalRevenue() { return Object.values(DB.revenue).reduce((s,e)=>s+(e.amount||0),0); }
 function totalExpenses() { return DB.expenses.reduce((s,e)=>s+(e.amount||0),0); }
 
@@ -1406,33 +1879,28 @@ function renderInventory() {
 // ════════════════════════════════════ ORDERS ════
 let orderItems = [];
 
-// Helper function to extract numeric order number
 function getOrderNumber(code) {
   const match = (code || '').match(/#?(\d+)/);
   return match ? parseInt(match[1]) : 0;
 }
 
-// Sort orders by order number (descending - highest first)
 function sortOrders(orders) {
   return [...orders].sort((a, b) => {
     const numA = getOrderNumber(a.code);
     const numB = getOrderNumber(b.code);
-    return numB - numA; // Descending: highest number first
+    return numB - numA;
   });
 }
 
-// Filter orders by search term
 function filterOrders() {
   const input = document.getElementById('order-search');
   const clearBtn = document.getElementById('search-clear-btn');
   searchTerm = input.value.trim().toLowerCase();
-  
   if (searchTerm.length > 0) {
     clearBtn.classList.add('visible');
   } else {
     clearBtn.classList.remove('visible');
   }
-  
   renderOrders();
 }
 
@@ -1445,6 +1913,7 @@ function clearSearch() {
 
 window.addOrderItemRow = function(name = '', size = 'M', price = '') {
   const wrap = document.getElementById('ord-items-wrap');
+  if (!wrap) return;
   const row = document.createElement('div');
   row.className = 'order-item-row';
   row.innerHTML = `
@@ -1561,7 +2030,6 @@ window.saveOrder = function() {
     DB.orders.push({ id: uid(), ...orderData });
   }
   
-  // Sort orders after saving
   DB.orders = sortOrders(DB.orders);
   saveToLocalStorage();
   syncToCloud();
@@ -1609,10 +2077,8 @@ function renderOrders() {
   let confirmed = 0, pending = 0, rejected = 0, cancelled = 0, returned = 0;
   let pendingFulfillment = 0;
   
-  // Get all orders sorted
   const sortedOrders = sortOrders(DB.orders);
   
-  // Filter if search term exists
   let filteredOrders = sortedOrders;
   if (searchTerm) {
     filteredOrders = sortedOrders.filter(o => {
@@ -1623,14 +2089,10 @@ function renderOrders() {
     });
   }
   
-  // Calculate stats from ALL orders
   DB.orders.forEach(o => {
-    // Confirmation status stats
     if (o.confirm === 'confirmed') confirmed++;
     else if (o.confirm === 'pending') pending++;
     else if (o.confirm === 'rejected') rejected++;
-    
-    // Fulfillment status stats
     if (o.status === 'cancelled') cancelled++;
     if (o.status === 'returned') returned++;
     if (o.status === 'pending' || o.status === 'processing') {
@@ -1640,12 +2102,11 @@ function renderOrders() {
   
   setVal('ord-total', total);
   setVal('ord-confirmed', confirmed);
-  setVal('ord-pending', pendingFulfillment); // <- This now counts fulfillment status
+  setVal('ord-pending', pendingFulfillment);
   setVal('ord-rejected', rejected);
   setVal('ord-cancelled', cancelled);
   setVal('ord-returned', returned);
   
-  // Percentages based on total orders
   const pct = (n) => total > 0 ? Math.round((n/total)*100) + '%' : '0%';
   setVal('ord-confirmed-pct', pct(confirmed));
   setVal('ord-pending-pct', pct(pendingFulfillment));
@@ -1653,7 +2114,6 @@ function renderOrders() {
   setVal('ord-cancelled-pct', pct(cancelled));
   setVal('ord-returned-pct', pct(returned));
   
-  // Show filter count
   const filterCountEl = document.getElementById('ord-filter-count');
   if (filterCountEl) {
     if (searchTerm) {
@@ -1689,290 +2149,7 @@ function renderOrders() {
 
 // ════════════════════════════════════ IMPORT ORDERS ════
 window.importOrdersFromExcel = function() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.csv,.txt';
-  input.onchange = function(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      try {
-        const text = e.target.result;
-        
-        let lines = [];
-        let currentLine = '';
-        let insideQuotes = false;
-        
-        for (let i = 0; i < text.length; i++) {
-          const char = text[i];
-          const nextChar = text[i + 1] || '';
-          
-          if (char === '"' && nextChar !== '"') {
-            insideQuotes = !insideQuotes;
-            currentLine += char;
-          } else if (char === '\n' && !insideQuotes) {
-            if (currentLine.trim()) {
-              lines.push(currentLine);
-            }
-            currentLine = '';
-          } else if (char === '\r' && !insideQuotes) {
-            // Skip carriage returns
-          } else {
-            currentLine += char;
-          }
-        }
-        if (currentLine.trim()) {
-          lines.push(currentLine);
-        }
-        
-        if (lines.length < 2) {
-          toast('❌ File is empty or invalid');
-          return;
-        }
-        
-        let headerIndex = -1;
-        let headerLine = '';
-        for (let i = 0; i < Math.min(lines.length, 10); i++) {
-          const lowerLine = lines[i].toLowerCase();
-          if (lowerLine.includes('shopify') || lowerLine.includes('order #') || 
-              lowerLine.includes('date') && lowerLine.includes('status') && lowerLine.includes('client')) {
-            headerIndex = i;
-            headerLine = lines[i];
-            break;
-          }
-        }
-        
-        if (headerIndex === -1) {
-          toast('❌ Could not find header row. Looking for: Shopify Order #, Date, Status, Client Name...');
-          return;
-        }
-        
-        const headers = parseCSVLine(headerLine);
-        
-        const colIndex = {
-          order: -1,
-          date: -1,
-          status: -1,
-          client: -1,
-          phone: -1,
-          email: -1,
-          address: -1,
-          item: -1,
-          size: -1,
-          qty: -1,
-          price: -1,
-          shipping: -1,
-          total: -1,
-          notes: -1
-        };
-        
-        headers.forEach((h, idx) => {
-          const lower = h.toLowerCase().trim();
-          if (lower.includes('shopify') || lower.includes('order #') || lower.includes('order#')) colIndex.order = idx;
-          else if (lower.includes('date')) colIndex.date = idx;
-          else if (lower.includes('status')) colIndex.status = idx;
-          else if (lower.includes('client') || lower.includes('name')) colIndex.client = idx;
-          else if (lower.includes('phone') || lower.includes('mobile')) colIndex.phone = idx;
-          else if (lower.includes('email')) colIndex.email = idx;
-          else if (lower.includes('address')) colIndex.address = idx;
-          else if (lower.includes('item') || lower.includes('product')) colIndex.item = idx;
-          else if (lower.includes('size')) colIndex.size = idx;
-          else if (lower.includes('qty') || lower.includes('quantity')) colIndex.qty = idx;
-          else if (lower.includes('price') && !lower.includes('shipping') && !lower.includes('total')) colIndex.price = idx;
-          else if (lower.includes('shipping')) colIndex.shipping = idx;
-          else if (lower.includes('total')) colIndex.total = idx;
-          else if (lower.includes('notes') || lower.includes('note')) colIndex.notes = idx;
-        });
-        
-        console.log('Column mapping:', colIndex);
-        console.log('Headers:', headers);
-        
-        let imported = 0;
-        let skipped = 0;
-        let errors = 0;
-        
-        for (let i = headerIndex + 1; i < lines.length; i++) {
-          try {
-            const line = lines[i].trim();
-            if (!line) continue;
-            
-            const row = parseCSVLine(line);
-            if (row.length < 3) continue;
-            
-            const orderCode = colIndex.order >= 0 && colIndex.order < row.length ? row[colIndex.order].trim() : '';
-            if (!orderCode || orderCode === '' || orderCode === '#') continue;
-            
-            if (DB.orders.some(o => o.code === orderCode)) {
-              skipped++;
-              continue;
-            }
-            
-            const rawDate = colIndex.date >= 0 && colIndex.date < row.length ? row[colIndex.date].trim() : '';
-            let date = '';
-            if (rawDate) {
-              try {
-                let d = new Date(rawDate);
-                if (isNaN(d)) {
-                  const parts = rawDate.split(/[\/\-]/);
-                  if (parts.length === 3) {
-                    const month = parseInt(parts[0]);
-                    const day = parseInt(parts[1]);
-                    const year = parseInt(parts[2]);
-                    if (!isNaN(month) && !isNaN(day) && !isNaN(year)) {
-                      d = new Date(year, month - 1, day);
-                    }
-                  }
-                }
-                if (!isNaN(d)) {
-                  date = d.toISOString().split('T')[0];
-                }
-              } catch(e) {}
-            }
-            if (!date) date = new Date().toISOString().split('T')[0];
-            
-            const statusMap = {
-              'delivered': 'delivered',
-              'shipping': 'shipping', 
-              'preparing': 'pending',
-              'pending': 'pending',
-              'cancelled': 'cancelled',
-              'canceled': 'cancelled',
-              'return': 'returned',
-              'returned': 'returned'
-            };
-            const rawStatus = colIndex.status >= 0 && colIndex.status < row.length ? row[colIndex.status].toLowerCase().trim() : 'pending';
-            const status = statusMap[rawStatus] || 'pending';
-            
-            const confirmMap = {
-              'pending': 'pending',
-              'confirmed': 'confirmed',
-              'rejected': 'rejected',
-              'delivered': 'confirmed'
-            };
-            const confirm = confirmMap[rawStatus] || 'pending';
-            
-            const rawNotes = colIndex.notes >= 0 && colIndex.notes < row.length ? row[colIndex.notes].toLowerCase().trim() : '';
-            
-            const client = colIndex.client >= 0 && colIndex.client < row.length ? row[colIndex.client].trim() : 'Unknown';
-            const phone = colIndex.phone >= 0 && colIndex.phone < row.length ? row[colIndex.phone].trim() : '';
-            const email = colIndex.email >= 0 && colIndex.email < row.length ? row[colIndex.email].trim() : '';
-            const address = colIndex.address >= 0 && colIndex.address < row.length ? row[colIndex.address].trim() : '';
-            
-            const itemName = colIndex.item >= 0 && colIndex.item < row.length ? row[colIndex.item].trim() : '';
-            const size = colIndex.size >= 0 && colIndex.size < row.length ? row[colIndex.size].trim().toUpperCase() : 'M';
-            const qty = parseInt(colIndex.qty >= 0 && colIndex.qty < row.length ? row[colIndex.qty].trim() : '1') || 1;
-            
-            let price = 0;
-            if (colIndex.price >= 0 && colIndex.price < row.length) {
-              price = parseFloat(row[colIndex.price].trim().replace(/,/g, '')) || 0;
-            }
-            
-            let shipping = 0;
-            if (colIndex.shipping >= 0 && colIndex.shipping < row.length) {
-              shipping = parseFloat(row[colIndex.shipping].trim().replace(/,/g, '')) || 0;
-            }
-            
-            let total = price * qty + shipping;
-            if (colIndex.total >= 0 && colIndex.total < row.length) {
-              const rawTotal = row[colIndex.total].trim().replace(/,/g, '');
-              if (rawTotal && !isNaN(parseFloat(rawTotal))) {
-                total = parseFloat(rawTotal);
-              }
-            }
-            
-            const items = [];
-            if (itemName) {
-              let tempName = itemName;
-              const separators = ['/', ',', '\n', '\r'];
-              let parts = [tempName];
-              for (const sep of separators) {
-                const newParts = [];
-                for (const p of parts) {
-                  if (p.includes(sep)) {
-                    const splitParts = p.split(sep);
-                    for (const sp of splitParts) {
-                      if (sp.trim()) newParts.push(sp.trim());
-                    }
-                  } else {
-                    newParts.push(p);
-                  }
-                }
-                parts = newParts;
-              }
-              
-              parts.forEach(part => {
-                let clean = part.trim();
-                const match = clean.match(/^x(\d+)\s*/i);
-                if (match) {
-                  clean = clean.replace(/^x\d+\s*/i, '').trim();
-                }
-                if (clean && clean.length > 1) {
-                  items.push({ 
-                    name: clean, 
-                    size: size, 
-                    price: price / (parts.length || 1) 
-                  });
-                }
-              });
-              
-              if (items.length === 0 && itemName.trim().length > 1) {
-                items.push({ name: itemName.trim(), size: size, price: price });
-              }
-            }
-            
-            if (items.length === 0) {
-              errors++;
-              continue;
-            }
-            
-            const subtotal = items.reduce((sum, it) => sum + (it.price || 0), 0);
-            
-            DB.orders.push({
-              id: uid(),
-              code: orderCode,
-              date: date,
-              client: client || 'Unknown',
-              phone: phone,
-              email: email,
-              address: address,
-              items: items,
-              subtotal: subtotal || price * qty,
-              shipping: shipping,
-              total: total || (price * qty + shipping),
-              confirm: confirm,
-              status: status,
-              note: rawNotes || ''
-            });
-            
-            imported++;
-          } catch(err) {
-            console.error('Error parsing row:', i, err);
-            errors++;
-          }
-        }
-        
-        // Sort after import
-        DB.orders = sortOrders(DB.orders);
-        
-        if (imported > 0) {
-          saveToLocalStorage();
-          syncToCloud();
-          renderOrders();
-          toast(`✅ Imported ${imported} orders${skipped > 0 ? `, ${skipped} skipped (duplicates)` : ''}${errors > 0 ? `, ${errors} errors` : ''}`);
-        } else {
-          toast(`⚠️ No orders imported. ${skipped > 0 ? `${skipped} duplicates skipped.` : 'Check file format.'}`);
-        }
-      } catch(err) {
-        console.error('Import error:', err);
-        toast('❌ Error importing: ' + err.message);
-      }
-    };
-    
-    reader.readAsText(file);
-  };
-  input.click();
+  toast('📥 Click + add order to manually add orders, or use the CSV import feature');
 };
 
 function parseCSVLine(line) {
@@ -1980,10 +2157,8 @@ function parseCSVLine(line) {
   let current = '';
   let insideQuotes = false;
   let i = 0;
-  
   while (i < line.length) {
     const char = line[i];
-    
     if (char === '"') {
       if (insideQuotes && line[i + 1] === '"') {
         current += '"';
@@ -2001,7 +2176,6 @@ function parseCSVLine(line) {
       i++;
     }
   }
-  
   result.push(current.trim());
   return result;
 }
