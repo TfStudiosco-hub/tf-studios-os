@@ -1607,6 +1607,7 @@ window.updateOrderStatus = function(id, status) {
 function renderOrders() {
   const total = DB.orders.length;
   let confirmed = 0, pending = 0, rejected = 0, cancelled = 0, returned = 0;
+  let pendingFulfillment = 0;
   
   // Get all orders sorted
   const sortedOrders = sortOrders(DB.orders);
@@ -1622,25 +1623,32 @@ function renderOrders() {
     });
   }
   
-  // Calculate stats from ALL orders (not filtered)
+  // Calculate stats from ALL orders
   DB.orders.forEach(o => {
+    // Confirmation status stats
     if (o.confirm === 'confirmed') confirmed++;
     else if (o.confirm === 'pending') pending++;
     else if (o.confirm === 'rejected') rejected++;
+    
+    // Fulfillment status stats
     if (o.status === 'cancelled') cancelled++;
     if (o.status === 'returned') returned++;
+    if (o.status === 'pending' || o.status === 'processing') {
+      pendingFulfillment++;
+    }
   });
   
   setVal('ord-total', total);
   setVal('ord-confirmed', confirmed);
-  setVal('ord-pending', pending);
+  setVal('ord-pending', pendingFulfillment); // <- This now counts fulfillment status
   setVal('ord-rejected', rejected);
   setVal('ord-cancelled', cancelled);
   setVal('ord-returned', returned);
   
+  // Percentages based on total orders
   const pct = (n) => total > 0 ? Math.round((n/total)*100) + '%' : '0%';
   setVal('ord-confirmed-pct', pct(confirmed));
-  setVal('ord-pending-pct', pct(pending));
+  setVal('ord-pending-pct', pct(pendingFulfillment));
   setVal('ord-rejected-pct', pct(rejected));
   setVal('ord-cancelled-pct', pct(cancelled));
   setVal('ord-returned-pct', pct(returned));
