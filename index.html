@@ -501,7 +501,6 @@ input[type=number]{-moz-appearance:textfield}
     </div>
   </div>
   <div class="pg-body">
-    <!-- Health Score -->
     <div class="grid4 gap analysis-kpi" id="analysis-health">
       <div class="card card-sm gcol2" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px">
         <div style="font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">brand health score</div>
@@ -520,7 +519,6 @@ input[type=number]{-moz-appearance:textfield}
       </div>
     </div>
 
-    <!-- Quick Stats -->
     <div class="grid6 gap">
       <div class="card card-sm"><h3>total orders</h3><div class="kpi-val" id="a-orders">0</div><div class="kpi-sub" id="a-orders-change">—</div></div>
       <div class="card card-sm"><h3>total units sold</h3><div class="kpi-val" id="a-units">0</div><div class="kpi-sub" id="a-units-change">—</div></div>
@@ -530,7 +528,6 @@ input[type=number]{-moz-appearance:textfield}
       <div class="card card-sm"><h3>inventory value</h3><div class="kpi-val" id="a-inv-value">EGP 0</div><div class="kpi-sub" id="a-inv-items">0 items</div></div>
     </div>
 
-    <!-- Daily Report -->
     <div class="card gap">
       <h3 style="font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:14px">daily report <span class="td-muted" style="font-weight:400;font-size:9px;letter-spacing:.08em;text-transform:none" id="daily-report-date"></span></h3>
       <div class="scroll-x">
@@ -541,7 +538,6 @@ input[type=number]{-moz-appearance:textfield}
       </div>
     </div>
 
-    <!-- Weekly Report -->
     <div class="card gap">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px">
         <h3 style="font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)">weekly report</h3>
@@ -560,7 +556,6 @@ input[type=number]{-moz-appearance:textfield}
       </div>
     </div>
 
-    <!-- Monthly Report -->
     <div class="card gap">
       <h3 style="font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:14px">monthly summary</h3>
       <div class="scroll-x">
@@ -571,7 +566,6 @@ input[type=number]{-moz-appearance:textfield}
       </div>
     </div>
 
-    <!-- All Time Report -->
     <div class="card gap">
       <h3 style="font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:14px">all time summary</h3>
       <div class="grid4 gap">
@@ -828,7 +822,7 @@ input[type=number]{-moz-appearance:textfield}
   <div class="pg-body">
     <div class="grid6 gap">
       <div class="card card-sm"><h3>total orders</h3><div class="kpi-val" id="ord-total">0</div></div>
-      <div class="card card-sm"><h3>confirmed</h3><div class="kpi-val" style="color:var(--restock)" id="ord-confirmed">0</div><div class="kpi-sub" id="ord-confirmed-pct">0%</div></div>
+      <div class="card card-sm"><h3>delivered</h3><div class="kpi-val" style="color:var(--restock)" id="ord-delivered">0</div><div class="kpi-sub" id="ord-delivered-pct">0%</div></div>
       <div class="card card-sm"><h3>pending</h3><div class="kpi-val" style="color:var(--warn)" id="ord-pending">0</div><div class="kpi-sub" id="ord-pending-pct">0%</div></div>
       <div class="card card-sm"><h3>rejected</h3><div class="kpi-val" style="color:var(--danger)" id="ord-rejected">0</div><div class="kpi-sub" id="ord-rejected-pct">0%</div></div>
       <div class="card card-sm"><h3>cancelled</h3><div class="kpi-val" style="color:var(--muted)" id="ord-cancelled">0</div><div class="kpi-sub" id="ord-cancelled-pct">0%</div></div>
@@ -884,7 +878,241 @@ input[type=number]{-moz-appearance:textfield}
 </div><!-- /content -->
 </div><!-- /shell -->
 
-<!-- MODALS (same as before - truncated for space) -->
+<!-- MODALS -->
+
+<!-- Revenue Modal -->
+<div class="modal-bg" id="modal-revenue">
+  <div class="modal">
+    <div class="modal-header"><h2>log revenue</h2><button class="modal-close" onclick="closeModal('modal-revenue')">×</button></div>
+    <div class="modal-body">
+      <div class="field-row c2">
+        <div class="field"><label>date</label><input type="date" id="rev-date"></div>
+        <div class="field"><label>amount (EGP)</label><div class="prefix-wrap"><span class="pfx">E£</span><input type="number" id="rev-amount" placeholder="0" min="0"></div></div>
+      </div>
+      <div class="field"><label>note (optional)</label><textarea id="rev-note" placeholder="drop 02 launch, promo day..."></textarea></div>
+      <div class="btn-row"><button class="btn btn-primary" onclick="saveRevenue()">save entry</button><button class="btn btn-ghost" onclick="closeModal('modal-revenue')">cancel</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Expense Modal -->
+<div class="modal-bg" id="modal-expense">
+  <div class="modal">
+    <div class="modal-header"><h2>add expense</h2><button class="modal-close" onclick="closeModal('modal-expense')">×</button></div>
+    <div class="modal-body">
+      <div class="field-row c2">
+        <div class="field"><label>date</label><input type="date" id="exp-date"></div>
+        <div class="field"><label>category</label>
+          <select id="exp-cat">
+            <option value="ads">meta ads</option>
+            <option value="stock">stock / inventory</option>
+            <option value="packaging">packaging</option>
+            <option value="shipping">shipping</option>
+            <option value="design">design / creative</option>
+            <option value="other">other</option>
+          </select>
+        </div>
+      </div>
+      <div class="field"><label>description</label><input type="text" id="exp-desc" placeholder="e.g. drop 02 ad campaign, hoodie restock..."></div>
+      <div class="field"><label>amount (EGP)</label><div class="prefix-wrap"><span class="pfx">E£</span><input type="number" id="exp-amount" placeholder="0" min="0"></div></div>
+      <div class="btn-row"><button class="btn btn-primary" onclick="saveExpense()">save expense</button><button class="btn btn-ghost" onclick="closeModal('modal-expense')">cancel</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- AD Log Modal -->
+<div class="modal-bg" id="modal-ad-log">
+  <div class="modal">
+    <div class="modal-header"><h2>log ad campaign data</h2><button class="modal-close" onclick="closeModal('modal-ad-log')">×</button></div>
+    <div class="modal-body">
+      <div class="field-row c2">
+        <div class="field"><label>date</label><input type="date" id="ad-date"></div>
+        <div class="field"><label>campaign name</label>
+          <select id="ad-campaign">
+            <option value="New Campaign">+ Create New</option>
+          </select>
+        </div>
+      </div>
+      <div id="new-campaign-field" style="display:none" class="field">
+        <label>new campaign name</label>
+        <input type="text" id="ad-new-campaign" placeholder="e.g. Drop 02 - Awareness">
+      </div>
+      <div class="field-row c3">
+        <div class="field"><label>spend (EGP)</label><div class="prefix-wrap"><span class="pfx">E£</span><input type="number" id="ad-spend" placeholder="0" min="0"></div></div>
+        <div class="field"><label>impressions</label><input type="number" id="ad-impressions" placeholder="0" min="0"></div>
+        <div class="field"><label>clicks</label><input type="number" id="ad-clicks" placeholder="0" min="0"></div>
+      </div>
+      <div class="field-row c3">
+        <div class="field"><label>conversions</label><input type="number" id="ad-conversions" placeholder="0" min="0"></div>
+        <div class="field"><label>revenue (EGP)</label><div class="prefix-wrap"><span class="pfx">E£</span><input type="number" id="ad-revenue" placeholder="0" min="0"></div></div>
+        <div class="field"><label>notes</label><input type="text" id="ad-notes" placeholder="optional notes"></div>
+      </div>
+      <div class="btn-row"><button class="btn btn-primary" onclick="saveAdLog()">save log</button><button class="btn btn-ghost" onclick="closeModal('modal-ad-log')">cancel</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Product Modal -->
+<div class="modal-bg" id="modal-product">
+  <div class="modal">
+    <div class="modal-header"><h2 id="prod-modal-title">add product</h2><button class="modal-close" onclick="closeModal('modal-product')">×</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="prod-edit-id">
+      <div class="field-row c2">
+        <div class="field"><label>product name</label><input type="text" id="prod-name" placeholder="e.g. TF Hoodie S26"></div>
+        <div class="field"><label>drop / collection</label><input type="text" id="prod-drop" placeholder="e.g. Drop 02"></div>
+      </div>
+      <div class="field-row c2">
+        <div class="field"><label>category</label>
+          <select id="prod-cat">
+            <option value="hoodie">hoodie</option>
+            <option value="tee">t-shirt</option>
+            <option value="jacket">jacket</option>
+            <option value="pants">pants</option>
+            <option value="accessory">accessory</option>
+            <option value="other">other</option>
+          </select>
+        </div>
+        <div class="field"><label>price (EGP)</label><div class="prefix-wrap"><span class="pfx">E£</span><input type="number" id="prod-price" placeholder="0" min="0"></div></div>
+      </div>
+      <div class="field"><label>sizes &amp; stock</label></div>
+      <div class="field-row c3">
+        <div class="field"><label>S</label><input type="number" id="sz-s" placeholder="0" min="0"></div>
+        <div class="field"><label>M</label><input type="number" id="sz-m" placeholder="0" min="0"></div>
+        <div class="field"><label>L</label><input type="number" id="sz-l" placeholder="0" min="0"></div>
+      </div>
+      <div class="field"><label>cost price (EGP) — what you paid</label><div class="prefix-wrap"><span class="pfx">E£</span><input type="number" id="prod-cost" placeholder="0" min="0"></div></div>
+      <div class="btn-row"><button class="btn btn-primary" onclick="saveProduct()">save product</button><button class="btn btn-ghost" onclick="closeModal('modal-product')">cancel</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Order Modal -->
+<div class="modal-bg" id="modal-order">
+  <div class="modal">
+    <div class="modal-header"><h2 id="order-modal-title">add order</h2><button class="modal-close" onclick="closeModal('modal-order')">×</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="ord-edit-id">
+      <div class="field-row c2">
+        <div class="field"><label>shopify order #</label><input type="text" id="ord-code" placeholder="#1101"></div>
+        <div class="field"><label>date</label><input type="date" id="ord-date"></div>
+      </div>
+      <div class="field-row c2">
+        <div class="field"><label>client name</label><input type="text" id="ord-client" placeholder="name"></div>
+        <div class="field"><label>phone</label><input type="text" id="ord-phone" placeholder="01x xxx xxxx"></div>
+      </div>
+      <div class="field-row c2">
+        <div class="field"><label>email</label><input type="email" id="ord-email" placeholder="client@email.com"></div>
+        <div class="field"><label>address</label><input type="text" id="ord-address" placeholder="city / area"></div>
+      </div>
+      <div style="margin:14px 0 8px;display:flex;align-items:center;justify-content:space-between">
+        <label style="font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)">order items</label>
+        <button class="btn btn-ghost btn-sm" onclick="addOrderItemRow()">+ add item</button>
+      </div>
+      <div id="ord-items-wrap"></div>
+      <div style="background:var(--s2);border:1px solid var(--b1);border-radius:2px;padding:14px;margin:14px 0">
+        <div class="field-row c2" style="margin-bottom:10px">
+          <div class="field" style="margin:0"><label>items subtotal (EGP)</label><div class="prefix-wrap"><span class="pfx">E£</span><input type="number" id="ord-subtotal" placeholder="0" min="0" readonly style="background:var(--s3);cursor:not-allowed"></div></div>
+          <div class="field" style="margin:0"><label>shipping fee (EGP)</label><div class="prefix-wrap"><span class="pfx">E£</span><input type="number" id="ord-shipping" placeholder="0" min="0" value="0" oninput="calcOrderTotal()"></div></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid var(--b1)">
+          <span style="font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)">order total</span>
+          <span style="font-family:var(--mono);font-size:18px;color:var(--text)" id="ord-total-display">EGP 0</span>
+        </div>
+      </div>
+      <div class="field-row c2">
+        <div class="field"><label>confirmation status</label>
+          <select id="ord-confirm">
+            <option value="pending">pending</option>
+            <option value="confirmed">confirmed</option>
+            <option value="rejected">rejected</option>
+          </select>
+        </div>
+        <div class="field"><label>fulfillment status</label>
+          <select id="ord-status">
+            <option value="pending">pending</option>
+            <option value="processing">processing</option>
+            <option value="shipped">shipped</option>
+            <option value="delivered">delivered</option>
+            <option value="cancelled">cancelled</option>
+            <option value="returned">returned</option>
+          </select>
+        </div>
+      </div>
+      <div class="field"><label>note</label><input type="text" id="ord-note" placeholder="cod, prepaid, special request..."></div>
+      <div class="btn-row"><button class="btn btn-primary" onclick="saveOrder()">save order</button><button class="btn btn-ghost" onclick="closeModal('modal-order')">cancel</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Influencer Modal -->
+<div class="modal-bg" id="modal-influencer">
+  <div class="modal">
+    <div class="modal-header"><h2>log gifting</h2><button class="modal-close" onclick="closeModal('modal-influencer')">×</button></div>
+    <div class="modal-body">
+      <div class="field-row c2">
+        <div class="field"><label>date</label><input type="date" id="inf-date"></div>
+        <div class="field"><label>influencer name / @</label><input type="text" id="inf-name" placeholder="@handle"></div>
+      </div>
+      <div class="field-row c2">
+        <div class="field"><label>platform</label>
+          <select id="inf-platform"><option>instagram</option><option>tiktok</option><option>both</option></select>
+        </div>
+        <div class="field"><label>followers (approx)</label><input type="text" id="inf-followers" placeholder="50k"></div>
+      </div>
+      <div class="field-row c2">
+        <div class="field"><label>item gifted</label><input type="text" id="inf-item" placeholder="TF Hoodie S26"></div>
+        <div class="field"><label>size</label>
+          <select id="inf-size"><option>S</option><option selected>M</option><option>L</option></select>
+        </div>
+      </div>
+      <div class="field-row c2">
+        <div class="field"><label>status</label>
+          <select id="inf-status"><option value="sent">sent</option><option value="posted">posted ✓</option><option value="pending">pending</option><option value="ghosted">ghosted</option></select>
+        </div>
+        <div class="field"><label>post link (optional)</label><input type="text" id="inf-link" placeholder="https://..."></div>
+      </div>
+      <div class="btn-row"><button class="btn btn-primary" onclick="saveInfluencer()">save</button><button class="btn btn-ghost" onclick="closeModal('modal-influencer')">cancel</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Drop Modal -->
+<div class="modal-bg" id="modal-drop">
+  <div class="modal">
+    <div class="modal-header"><h2>new drop</h2><button class="modal-close" onclick="closeModal('modal-drop')">×</button></div>
+    <div class="modal-body">
+      <div class="field-row c2">
+        <div class="field"><label>drop name</label><input type="text" id="drop-name" placeholder="Drop 02 / S26D2"></div>
+        <div class="field"><label>drop date</label><input type="date" id="drop-date"></div>
+      </div>
+      <div class="field"><label>description</label><textarea id="drop-desc" placeholder="what's in this drop..."></textarea></div>
+      <div class="field-row c2">
+        <div class="field"><label>status</label>
+          <select id="drop-status"><option value="upcoming">upcoming</option><option value="live">live</option><option value="sold out">sold out</option><option value="archived">archived</option></select>
+        </div>
+        <div class="field"><label>total units</label><input type="number" id="drop-units" placeholder="0" min="0"></div>
+      </div>
+      <div class="btn-row"><button class="btn btn-primary" onclick="saveDrop()">save drop</button><button class="btn btn-ghost" onclick="closeModal('modal-drop')">cancel</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Restock Modal -->
+<div class="modal-bg" id="modal-restock">
+  <div class="modal">
+    <div class="modal-header"><h2 id="restock-title">restock</h2><button class="modal-close" onclick="closeModal('modal-restock')">×</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="restock-prod-id">
+      <div class="field-row c3">
+        <div class="field"><label>S</label><input type="number" id="rst-s" placeholder="0" min="0"></div>
+        <div class="field"><label>M</label><input type="number" id="rst-m" placeholder="0" min="0"></div>
+        <div class="field"><label>L</label><input type="number" id="rst-l" placeholder="0" min="0"></div>
+      </div>
+      <div class="btn-row"><button class="btn btn-primary" onclick="doRestock()">add stock</button><button class="btn btn-ghost" onclick="closeModal('modal-restock')">cancel</button></div>
+    </div>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 
@@ -1305,7 +1533,6 @@ function generateAnalysisData() {
     return s + (total * (p.cost || 0));
   }, 0);
   
-  // Health score calculation
   let score = 0;
   if (netProfit > 0) score += 20;
   else if (netProfit > -1000) score += 10;
@@ -1320,7 +1547,6 @@ function generateAnalysisData() {
   
   const healthScore = Math.min(100, score);
   
-  // Daily report
   const days = [...new Set([
     ...revenueEntries.map(([k]) => k),
     ...DB.orders.map(o => o.date),
@@ -1355,7 +1581,6 @@ function renderAnalysis() {
   const data = generateAnalysisData();
   if (!data) return;
   
-  // Health Score
   const scoreEl = document.getElementById('health-score');
   const labelEl = document.getElementById('health-label');
   scoreEl.textContent = data.healthScore + '%';
@@ -1384,7 +1609,6 @@ function renderAnalysis() {
   setVal('a-inv-value', fmt(data.inventoryValue));
   document.getElementById('a-inv-items').textContent = DB.products.length + ' items';
   
-  // Daily report
   const dailyBody = document.getElementById('daily-report-body');
   const today = new Date();
   document.getElementById('daily-report-date').textContent = '— ' + today.toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
@@ -1404,13 +1628,9 @@ function renderAnalysis() {
     }).join('') : '<tr><td colspan="7" class="empty-state">no data yet</td></tr>';
   }
   
-  // Weekly report
   renderAnalysisWeekly();
-  
-  // Monthly report
   renderAnalysisMonthly();
   
-  // All time
   setVal('at-revenue', fmt(data.totalRevenue));
   setVal('at-orders', data.totalOrders);
   setVal('at-ad-spend', fmt(data.totalAdSpend));
@@ -2229,8 +2449,9 @@ window.updateOrderStatus = function(id, status) {
 
 function renderOrders() {
   const total = DB.orders.length;
-  let confirmed = 0, pending = 0, rejected = 0, cancelled = 0, returned = 0;
+  let delivered = 0, pending = 0, rejected = 0, cancelled = 0, returned = 0;
   let pendingFulfillment = 0;
+  
   const sortedOrders = sortOrders(DB.orders);
   let filteredOrders = sortedOrders;
   if (searchTerm) {
@@ -2241,26 +2462,30 @@ function renderOrders() {
       return codeMatch || clientMatch || phoneMatch;
     });
   }
+  
   DB.orders.forEach(o => {
-    if (o.confirm === 'confirmed') confirmed++;
+    if (o.status === 'delivered') delivered++;
     else if (o.confirm === 'pending') pending++;
     else if (o.confirm === 'rejected') rejected++;
     if (o.status === 'cancelled') cancelled++;
     if (o.status === 'returned') returned++;
     if (o.status === 'pending' || o.status === 'processing') pendingFulfillment++;
   });
+  
   setVal('ord-total', total);
-  setVal('ord-confirmed', confirmed);
+  setVal('ord-delivered', delivered);
   setVal('ord-pending', pendingFulfillment);
   setVal('ord-rejected', rejected);
   setVal('ord-cancelled', cancelled);
   setVal('ord-returned', returned);
+  
   const pct = (n) => total > 0 ? Math.round((n/total)*100) + '%' : '0%';
-  setVal('ord-confirmed-pct', pct(confirmed));
+  setVal('ord-delivered-pct', pct(delivered));
   setVal('ord-pending-pct', pct(pendingFulfillment));
   setVal('ord-rejected-pct', pct(rejected));
   setVal('ord-cancelled-pct', pct(cancelled));
   setVal('ord-returned-pct', pct(returned));
+  
   const filterCountEl = document.getElementById('ord-filter-count');
   if (filterCountEl) {
     if (searchTerm) {
@@ -2269,6 +2494,7 @@ function renderOrders() {
       filterCountEl.textContent = `${total} orders`;
     }
   }
+  
   const tbody = document.getElementById('ord-body');
   if(!tbody) return;
   tbody.innerHTML = filteredOrders.length ? filteredOrders.map(o => {
