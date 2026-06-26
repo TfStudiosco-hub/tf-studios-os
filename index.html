@@ -1300,33 +1300,81 @@ document.querySelectorAll('.modal-bg').forEach(m => {
   m.addEventListener('click', e => { if(e.target === m) m.classList.remove('open'); });
 });
 
-// Ad modal campaign dropdown
+// ════════════════════════════════════ ADS TRACKER ════
+
+// Handle campaign dropdown changes
 document.getElementById('ad-campaign').addEventListener('change', function() {
   const newCampaignField = document.getElementById('new-campaign-field');
   if (this.value === 'New Campaign') {
     newCampaignField.style.display = 'block';
+    document.getElementById('ad-new-campaign').focus();
   } else {
     newCampaignField.style.display = 'none';
+    document.getElementById('ad-new-campaign').value = '';
+  }
+});
+
+// Handle Enter key in new campaign field
+document.getElementById('ad-new-campaign').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const name = this.value.trim();
+    if (name) {
+      const select = document.getElementById('ad-campaign');
+      // Check if campaign already exists
+      let exists = false;
+      for (let i = 0; i < select.options.length; i++) {
+        if (select.options[i].value === name) {
+          exists = true;
+          break;
+        }
+      }
+      if (!exists) {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        select.appendChild(opt);
+      }
+      select.value = name;
+      document.getElementById('new-campaign-field').style.display = 'none';
+      this.value = '';
+      toast('✅ Campaign "' + name + '" created');
+    }
   }
 });
 
 function updateCampaignDropdown() {
   const select = document.getElementById('ad-campaign');
   const currentValue = select.value;
+  
   select.innerHTML = '<option value="New Campaign">+ Create New</option>';
+  
+  // Get unique campaigns from logs
   const campaigns = [...new Set(DB.adsLogs.map(l => l.campaign))].filter(Boolean);
+  
+  // Also include campaigns from the adsCampaigns array
+  DB.adsCampaigns.forEach(c => {
+    if (c && !campaigns.includes(c)) {
+      campaigns.push(c);
+    }
+  });
+  
+  // Sort campaigns alphabetically
+  campaigns.sort();
+  
   campaigns.forEach(c => {
     const opt = document.createElement('option');
     opt.value = c;
     opt.textContent = c;
     select.appendChild(opt);
   });
-  if (currentValue && campaigns.includes(currentValue)) {
+  
+  // Try to restore the selected value
+  if (currentValue && currentValue !== 'New Campaign' && campaigns.includes(currentValue)) {
     select.value = currentValue;
   }
 }
 
-// ════════════════════════════════════ ADS TRACKER ════
 window.saveAdLog = function() {
   const date = document.getElementById('ad-date').value;
   let campaign = document.getElementById('ad-campaign').value;
@@ -1338,11 +1386,14 @@ window.saveAdLog = function() {
   const revenue = parseFloat(document.getElementById('ad-revenue').value) || 0;
   const notes = document.getElementById('ad-notes').value.trim();
   
-  if (!date || !campaign) return toast('Date and campaign required');
+  if (!date) return toast('Date is required');
+  
+  // If "New Campaign" is selected and a new name is provided, use it
   if (campaign === 'New Campaign' && newCampaign) {
     campaign = newCampaign;
   }
-  if (campaign === 'New Campaign' || !campaign) return toast('Please select or create a campaign');
+  
+  if (!campaign || campaign === 'New Campaign') return toast('Please select or create a campaign');
   if (spend <= 0 && impressions <= 0 && clicks <= 0) return toast('Enter at least spend, impressions, or clicks');
   
   const cpc = clicks > 0 ? spend / clicks : 0;
@@ -1366,16 +1417,19 @@ window.saveAdLog = function() {
     notes: notes
   });
   
+  // Add to campaigns list if new
   if (!DB.adsCampaigns.includes(campaign)) {
     DB.adsCampaigns.push(campaign);
   }
   
+  // Sort logs by date (newest first)
   DB.adsLogs.sort((a,b) => b.date.localeCompare(a.date));
   
   saveToLocalStorage();
   syncToCloud();
   closeModal('modal-ad-log');
   
+  // Reset form
   document.getElementById('ad-spend').value = '';
   document.getElementById('ad-impressions').value = '';
   document.getElementById('ad-clicks').value = '';
@@ -1386,7 +1440,7 @@ window.saveAdLog = function() {
   document.getElementById('new-campaign-field').style.display = 'none';
   
   renderAdsTracker();
-  toast('✅ Ad data saved');
+  toast('✅ Ad data saved for campaign: ' + campaign);
 };
 
 window.deleteAdLog = function(id) {
